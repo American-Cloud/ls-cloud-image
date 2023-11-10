@@ -123,19 +123,19 @@ domaininput(){
         echo -e "\nPlease input a valid domain\n"
         exit 1
     fi
-    domain_filter ${DOMAIN}
+    domain_filter "${DOMAIN}"
     echo -e "The domain you put is: \e[31m${DOMAIN}\e[39m"
     printf "%s"  "Please verify it is correct. [y/N] "
 }
 
 duplicateck(){
-    grep "${1}" ${2} >/dev/null 2>&1
+    grep "${1}" "${2}" >/dev/null 2>&1
 }
 
 www_domain(){
-    CHECK_WWW=$(echo ${1} | cut -c1-4)
+    CHECK_WWW=$(echo "${1}" | cut -c1-4)
     if [[ ${CHECK_WWW} == www. ]] ; then
-        DOMAIN=$(echo ${1} | cut -c 5-)
+        DOMAIN=$(echo "${1}" | cut -c 5-)
     else
         DOMAIN=${1}
     fi
@@ -143,12 +143,12 @@ www_domain(){
 }
 
 domainadd(){
-    duplicateck ${DOMAIN} ${WEBCF}
+    duplicateck "${DOMAIN}" ${WEBCF}
     if [ ${?} = 1 ]; then
         if [ ${PROVIDER} = 'do' ]; then
-            sed -i 's|'${VHNAME}' '${MY_IP}'|'${VHNAME}' '${MY_IP}', '${DOMAIN}', '${WWW_DOMAIN}' |g' ${WEBCF}
+            sed -i "s|'${VHNAME}' '${MY_IP}'|'${VHNAME}' '${MY_IP}', '${DOMAIN}', '${WWW_DOMAIN}' |g" ${WEBCF}
         else
-            sed -i 's|'${VHNAME}' \*|'${VHNAME}' \*, '${DOMAIN}', '${WWW_DOMAIN}' |g' ${WEBCF}
+            sed -i "s|'${VHNAME}' \*|'${VHNAME}' \*, '${DOMAIN}', '${WWW_DOMAIN}' |g" ${WEBCF}
         fi
     fi
     restart_lsws
@@ -156,11 +156,11 @@ domainadd(){
 }
 
 domainverify(){
-    curl -Is http://${DOMAIN}/ | grep -i 'LiteSpeed\|cloudflare' > /dev/null 2>&1
+    curl -Is "http://${DOMAIN}/" | grep -i 'LiteSpeed\|cloudflare' > /dev/null 2>&1
     if [ ${?} = 0 ]; then
         echoG "[OK] ${DOMAIN} is accessible."
         TYPE=1
-        curl -Is http://${WWW_DOMAIN}/ | grep -i 'LiteSpeed\|cloudflare' > /dev/null 2>&1
+        curl -Is "http://${WWW_DOMAIN}/" | grep -i 'LiteSpeed\|cloudflare' > /dev/null 2>&1
         if [ ${?} = 0 ]; then
             echoG "[OK] ${WWW_DOMAIN} is accessible."
             TYPE=2
@@ -178,7 +178,7 @@ main_domain_setup(){
         domaininput
         read -r TMP_YN
         if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
-            www_domain ${DOMAIN}
+            www_domain "${DOMAIN}"
             domainadd
             break
         fi
@@ -230,9 +230,9 @@ certbothook(){
 
 lecertapply(){
     if [ ${TYPE} = 1 ]; then
-        certbot certonly --non-interactive --agree-tos -m ${EMAIL} --webroot -w ${DOCHM} -d ${DOMAIN}
+        certbot certonly --non-interactive --agree-tos -m "${EMAIL}" --webroot -w ${DOCHM} -d "${DOMAIN}"
     elif [ ${TYPE} = 2 ]; then
-        certbot certonly --non-interactive --agree-tos -m ${EMAIL} --webroot -w ${DOCHM} -d ${DOMAIN} -d ${WWW_DOMAIN}
+        certbot certonly --non-interactive --agree-tos -m "${EMAIL}" --webroot -w ${DOCHM} -d "${DOMAIN}" -d "${WWW_DOMAIN}"
     else
         echo 'Unknown type!'; exit 2
     fi
