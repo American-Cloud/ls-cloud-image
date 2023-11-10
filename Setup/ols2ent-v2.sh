@@ -43,7 +43,7 @@ show_help() {
     echow '-L, --lsws'
     echo "${EPACE}${EPACE} Install and switch from OLS to LSWS. "
     echow '-R, --restore'
-    echo "${EPACE}${EPACE} Restore to OpenLiteSpeed. "    
+    echo "${EPACE}${EPACE} Restore to OpenLiteSpeed. "
     echow '-H, --help'
     echo "${EPACE}${EPACE}Display help and exit."
     exit 0
@@ -60,9 +60,9 @@ webadmin_reset() {
         WEBADMIN_PASS=$(awk -F '=' '{print $2}' /root/.litespeed_password)
     elif [ -e /home/ubuntu/.litespeed_password ]; then
         WEBADMIN_PASS=$(awk -F '=' '{print $2}' /home/ubuntu/.litespeed_password)
-    else    
+    else
         WEBADMIN_PASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16 ; echo '')
-    fi    
+    fi
     TEMP=`${LS_DIR}/admin/fcgi-bin/${php_command} ${LS_DIR}/admin/misc/htpasswd.php ${WEBADMIN_PASS}`
     echo "" > ${LS_DIR}/admin/conf/htpasswd
     echo "admin:$TEMP" > ${LS_DIR}/admin/conf/htpasswd
@@ -80,8 +80,8 @@ check_no_panel(){
         PANEL='directadmin'
     fi
     if [ ! -z "${PANEL}" ]; then
-        echoR "Detect control panel: ${PANEL}, exit!"; exit 1 
-    fi 
+        echoR "Detect control panel: ${PANEL}, exit!"; exit 1
+    fi
 }
 
 
@@ -89,11 +89,11 @@ check_pkg_manage(){
     if hash apt > /dev/null 2>&1 ; then
         PKG_TOOL='apt'
         USER="www-data"
-        GROUP="www-data"      
+        GROUP="www-data"
     elif hash yum > /dev/null 2>&1 ; then
         PKG_TOOL='yum'
         USER="nobody"
-        GROUP="nobody"      
+        GROUP="nobody"
     else
       echoR 'can not detect package management tool ...'
       exit 1
@@ -106,15 +106,15 @@ check_php(){
     elif [ -e ${LS_DIR}/lsphp74/bin/php ]; then
         PHP="${LS_DIR}/lsphp74/bin/php"
     elif [ -e ${LS_DIR}/lsphp81/bin/php ]; then
-        PHP="${LS_DIR}/lsphp81/bin/php"        
-    fi  
+        PHP="${LS_DIR}/lsphp81/bin/php"
+    fi
     which ${PHP} >/dev/null
     if [ ${?} = 0 ]; then
         echoG 'PHP path exist'
     else
         ls ${LS_DIR}/lsphp* >/dev/null
         if [ ${?} = 0 ]; then
-            echoG 'PHP path update' 
+            echoG 'PHP path update'
             PHP=$(find ${LS_DIR}/lsphp* -path \*bin/php | head -n 1)
         fi
         which ${PHP} >/dev/null
@@ -151,7 +151,7 @@ gen_ent_config(){
         exit 1
     fi
     ${PHP} ${LS_DIR}/admin/misc/converter.php 2>${CONVERT_LOG}
-    if [ ${?} != 0 ]; then 
+    if [ ${?} != 0 ]; then
         echo "Convert config file failed, error code: ${?}"
         echoR "#############################################"
         cat ${CONVERT_LOG}
@@ -168,13 +168,13 @@ gen_ent_config(){
             mkdir -p ${STORE_DIR}/ent_conf/vhosts/"${VNAME}"
         fi
     done
-    for FILE in "${CONVERTPATH[@]}"; do 
+    for FILE in "${CONVERTPATH[@]}"; do
         VFILE=$(echo ${FILE} | awk -F '/' '$6 == "vhosts" {print $7}')
         if [ ! -z "${VFILE}" ]; then
             cp "${FILE}" ${STORE_DIR}/ent_conf/vhosts/"${VFILE}"/
-        else    
+        else
             cp "${FILE}" ${STORE_DIR}/ent_conf/
-        fi    
+        fi
     done
 }
 
@@ -271,7 +271,7 @@ write_license() {
             echoR 'It apeears to have some issue with license , please check above result...'
             exit 1
         fi
-        echoG 'License seems valid...'    
+        echoG 'License seems valid...'
     fi
 }
 
@@ -292,12 +292,12 @@ check_license(){
 }
 
 license_input() {
-    echo -e "\nPlease note that your server has \e[31m$TOTAL_RAM MB\e[39m RAM"   
+    echo -e "\nPlease note that your server has \e[31m$TOTAL_RAM MB\e[39m RAM"
     if [ "$TOTAL_RAM" -gt 2048 ]; then
         echo "$TOTAL_RAM is greater than 2048 MB RAM"
 		echo -e "If you are using \e[31mFree Starter\e[39m LiteSpeed license, It will not start due to 2GB RAM limit."
 	fi
-    
+
     echo -e "If you do not have any license, you can also use trial license (if server has not used trial license before), type \e[31mTRIAL\e[39m\n"
     while true; do
         printf "%s" "Please input your serial number for LiteSpeed WebServer Enterprise: "
@@ -328,7 +328,7 @@ restart_lsws(){
     else
         echo -e "Something went wrong , LSWS can not be started."
         exit 1
-    fi    
+    fi
 }
 
 check_return() {
@@ -423,7 +423,7 @@ check_no_lsws(){
     if ${LS_DIR}/bin/lshttpd -v | grep -q Enterprise ; then
         echoG 'You have already installed LiteSpeed Enterprise...'
         exit 1
-    fi    
+    fi
 }
 
 main_pre_check(){
@@ -467,7 +467,7 @@ case ${1} in
     -[lL] | -lsws | --lsws)
         main_to_lsws; exit 0
         ;;
-    *) 
+    *)
         main_to_lsws; exit 0
         ;;
 esac

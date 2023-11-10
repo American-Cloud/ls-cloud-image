@@ -43,7 +43,7 @@ linechange(){
     if [ -n "$LINENUM" ] && [ "$LINENUM" -eq "$LINENUM" ] 2>/dev/null; then
         sed -i "${LINENUM}d" ${2}
         sed -i "${LINENUM}i${3}" ${2}
-    fi  
+    fi
 }
 
 get_sql_ver(){
@@ -52,14 +52,14 @@ get_sql_ver(){
     SQL_SECV=$(echo ${SQLDBVER} | awk -F '.' '{print $2}')
 }
 
-check_sql_ver(){    
+check_sql_ver(){
     if (( ${SQL_MAINV} >=11 && ${SQL_MAINV}<=99 )); then
         echoG '[OK] Mariadb version -ge 11'
     elif (( ${SQL_MAINV} >=10 )) && (( ${SQL_SECV} >=3 )); then
         echoG '[OK] Mariadb version -ge 10.3'
     else
-        echoR "Mariadb version ${SQLDBVER} is lower than 10.3, please check!"    
-    fi     
+        echoR "Mariadb version ${SQLDBVER} is lower than 10.3, please check!"
+    fi
 }
 
 
@@ -74,43 +74,43 @@ check_os()
         OSVER=$(cat /etc/redhat-release | awk '{print substr($4,1,1)}')
     elif [ -f /etc/lsb-release ] ; then
         OSNAME=ubuntu
-        OSNAMEVER="UBUNTU$(lsb_release -sr | awk -F '.' '{print $1}')"    
+        OSNAMEVER="UBUNTU$(lsb_release -sr | awk -F '.' '{print $1}')"
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 
 providerck()
 {
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s bios-vendor)" = 'Vultr' ];then
-        PROVIDER='vultr'        
+        PROVIDER='vultr'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
         PROVIDER='aliyun'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
         PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
         PROVIDER='oracle'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 
 oshmpath()
 {
-    if [ ${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then 
+    if [ ${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
-    elif [ ${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then 
+    elif [ ${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
     elif [ ${PROVIDER} = 'aliyun' ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
     elif [ ${PROVIDER} = 'oracle' ] && [ -d /home/ubuntu ]; then
-        HMPATH='/home/ubuntu'        
+        HMPATH='/home/ubuntu'
     else
         HMPATH='/root'
     fi
@@ -128,7 +128,7 @@ prepare(){
 
 system_upgrade() {
     echoG 'Updating system'
-    if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then 
+    if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then
         apt-get update > /dev/null 2>&1
         echo -ne '#####                     (33%)\r'
         DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' upgrade > /dev/null 2>&1
@@ -142,17 +142,17 @@ system_upgrade() {
         echo -ne '#                         (5%)\r'
         yum update -y > /dev/null 2>&1
         echo -ne '#######################   (100%)\r'
-    fi    
+    fi
 }
 
 wp_conf_path(){
-    if [ -f "${LSWSCONF}" ]; then 
-        if [ ! -f $(grep 'configFile.*wordpress' "${LSWSCONF}" | awk '{print $2}') ]; then 
+    if [ -f "${LSWSCONF}" ]; then
+        if [ ! -f $(grep 'configFile.*wordpress' "${LSWSCONF}" | awk '{print $2}') ]; then
             WPVHCONF="${EXAMPLECONF}"
         fi
     else
         echo 'Can not find LSWS Config, exit script'
-        exit 1    
+        exit 1
     fi
 }
 
@@ -198,7 +198,7 @@ centos_install_php(){
 }
 
 centos_install_certbot(){
-    echoG "Install CertBot" 
+    echoG "Install CertBot"
     if [ ${OSVER} = 8 ]; then
         wget -q https://dl.eff.org/certbot-auto
         mv certbot-auto /usr/local/bin/certbot
@@ -208,15 +208,15 @@ centos_install_certbot(){
     else
         yum -y install certbot  > /dev/null 2>&1
     fi
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
         fi
         echoG 'Install CertBot finished'
-    else 
-        echoR 'Please check CertBot'    
-    fi    
-} 
+    else
+        echoR 'Please check CertBot'
+    fi
+}
 
 ubuntu_install_basic(){
     apt-get -y install wget unzip > /dev/null 2>&1
@@ -237,39 +237,39 @@ ubuntu_install_postfix(){
     -o Dpkg::Options::='--force-confold' install postfix > /dev/null 2>&1
 }
 
-ubuntu_install_certbot(){       
-    echoG "Install CertBot" 
+ubuntu_install_certbot(){
+    echoG "Install CertBot"
     if [ "${OSNAMEVER}" = 'UBUNTU18' ]; then
         add-apt-repository universe > /dev/null 2>&1
         echo -ne '\n' | add-apt-repository ppa:certbot/certbot > /dev/null 2>&1
-    fi    
+    fi
     apt-get update > /dev/null 2>&1
     apt-get -y install certbot > /dev/null 2>&1
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
-        fi    
-        echoG 'Install CertBot finished'    
-    else 
-        echoR 'Please check CertBot'    
-    fi    
+        fi
+        echoG 'Install CertBot finished'
+    else
+        echoR 'Please check CertBot'
+    fi
 }
 
 install_composer(){
     echoG 'Install composer'
     curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
     HASH=`curl -sS https://composer.github.io/installer.sig`
-    php -r "if (hash_file('SHA384', '/tmp/composer-setup.php') === '$HASH'){ echo 'Installer verified'; } 
+    php -r "if (hash_file('SHA384', '/tmp/composer-setup.php') === '$HASH'){ echo 'Installer verified'; }
         else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" >/dev/null
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer >/dev/null
-    if [ -e /usr/local/bin/composer ]; then 
+    if [ -e /usr/local/bin/composer ]; then
         export COMPOSER_ALLOW_SUPERUSER=1
     else
         echoR 'Composer install failed, exit!'; exit 1
-    fi    
-    if [ ! -e /usr/bin/composer ]; then 
+    fi
+    if [ ! -e /usr/bin/composer ]; then
         ln -s /usr/local/bin/composer /usr/bin/composer
-    fi    
+    fi
 }
 
 install_drush(){
@@ -277,17 +277,17 @@ install_drush(){
     composer global require drush/drush:^${DRUSHVER} --with-all-dependencies -W -q
     wget -O drush.phar https://github.com/drush-ops/drush-launcher/releases/latest/download/drush.phar -q
     chmod +x drush.phar
-    if [ ! -e /usr/local/bin/drush ]; then 
+    if [ ! -e /usr/local/bin/drush ]; then
         mv drush.phar /usr/local/bin/drush
     fi
-    if [ ! -e /usr/bin/drush ]; then 
+    if [ ! -e /usr/bin/drush ]; then
         ln -s /usr/local/bin/drush /usr/bin/drush
     fi
-}    
+}
 
 install_phpmyadmin(){
-    if [ ! -f ${PHPCONF}/changelog.php ]; then 
-        cd /tmp/ 
+    if [ ! -f ${PHPCONF}/changelog.php ]; then
+        cd /tmp/
         echoG 'Download phpmyadmin'
         wget -q https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
         unzip phpMyAdmin-latest-all-languages.zip > /dev/null 2>&1
@@ -297,16 +297,16 @@ install_phpmyadmin(){
         mv ${PHPCONF}/config.sample.inc.php ${PHPCONF}/config.inc.php
     fi
     change_owner ${PHPCONF}
-}  
+}
 
 centos_config_ols(){
     echoG 'Setting Web Server config'
-    yum -y install --reinstall openlitespeed > /dev/null 2>&1   
+    yum -y install --reinstall openlitespeed > /dev/null 2>&1
     NEWKEY='  vhRoot                  /var/www/html'
     linechange 'www/html' ${LSWSCONF} "${NEWKEY}"
     sed -i '/errorlog logs\/error.log/a \ \ \ \ \ \ \ \ keepDays             1' ${LSWSCONF}
     sed -i 's/maxStaleAge         200/maxStaleAge         0/g' ${LSWSCONF}
-    cat > ${WPVHCONF} <<END 
+    cat > ${WPVHCONF} <<END
 docRoot                   ${DOCLAND}/
 
 index  {
@@ -356,8 +356,8 @@ rewrite  {
   autoLoadHtaccess        1
 }
 END
-    if [ -d ${LSWSVCONF}/wordpress ] && [ ! -d ${LSWSVCONF}/drupal ]; then 
-        mv ${LSWSVCONF}/wordpress ${LSWSVCONF}/drupal  
+    if [ -d ${LSWSVCONF}/wordpress ] && [ ! -d ${LSWSVCONF}/drupal ]; then
+        mv ${LSWSVCONF}/wordpress ${LSWSVCONF}/drupal
     fi
     sed -i "s/wordpress/drupal/g" ${LSWSCONF}
     echoG 'Finish Web Server config'
@@ -373,7 +373,7 @@ ubuntu_config_ols(){
     linechange 'www/html' ${LSWSCONF} "${NEWKEY}"
     sed -i '/errorlog logs\/error.log/a \ \ \ \ \ \ \ \ keepDays             1' ${LSWSCONF}
     sed -i 's/maxStaleAge         200/maxStaleAge         0/g' ${LSWSCONF}
-    cat > ${WPVHCONF} <<END 
+    cat > ${WPVHCONF} <<END
 docRoot                   ${DOCLAND}/
 
 index  {
@@ -411,7 +411,7 @@ context exp:^/sites/default/files/styles/(.*)/public/(.*) {
 context /web/ {
   location                /var/www/html/web/
   allowBrowse             1
- 
+
   addDefaultCharset       off
 
 }
@@ -421,8 +421,8 @@ rewrite  {
   autoLoadHtaccess        1
 }
 END
-    if [ -d ${LSWSVCONF}/wordpress ] && [ ! -d ${LSWSVCONF}/drupal ]; then 
-        mv ${LSWSVCONF}/wordpress ${LSWSVCONF}/drupal  
+    if [ -d ${LSWSVCONF}/wordpress ] && [ ! -d ${LSWSVCONF}/drupal ]; then
+        mv ${LSWSVCONF}/wordpress ${LSWSVCONF}/drupal
     fi
     sed -i "s/wordpress/drupal/g" ${LSWSCONF}
     echoG 'Finish Web Server config'
@@ -433,11 +433,11 @@ landing_pg(){
     echoG 'Setting Landing Page'
     curl -s https://raw.githubusercontent.com/litespeedtech/ls-cloud-image/master/Static/drupal-landing.html \
     -o ${DOCLAND}/index.html
-    if [ -e ${DOCLAND}/index.html ]; then 
+    if [ -e ${DOCLAND}/index.html ]; then
         echoG 'Landing Page finished'
     else
         echoR "Please check Landing Page here ${DOCLAND}/index.html"
-    fi    
+    fi
 }
 
 config_php(){
@@ -454,16 +454,16 @@ config_php(){
 update_final_permission(){
     change_owner ${DOCHM}
     change_owner /tmp/lshttpd/lsphp.sock*
-    rm -f /tmp/lshttpd/.rtreport 
+    rm -f /tmp/lshttpd/.rtreport
     rm -f /tmp/lshttpd/.status
 }
 
 config_mysql(){
     echoG 'Setting DataBase'
     get_sql_ver
-    if [ -f ${DBPASSPATH} ]; then 
-        EXISTSQLPASS=$(grep root_mysql_passs ${HMPATH}/.db_password | awk -F '"' '{print $2}'); 
-    fi    
+    if [ -f ${DBPASSPATH} ]; then
+        EXISTSQLPASS=$(grep root_mysql_passs ${HMPATH}/.db_password | awk -F '"' '{print $2}');
+    fi
     if [ "${EXISTSQLPASS}" = '' ]; then
         if (( ${SQL_MAINV} >=10 )) && (( ${SQL_SECV} >=4 )); then
             mysql -u root -p${root_mysql_pass} \
@@ -471,19 +471,19 @@ config_mysql(){
         else
             mysql -u root -p${root_mysql_pass} \
                 -e "update mysql.user set authentication_string=password('${root_mysql_pass}') where user='root';"
-        fi    
+        fi
     else
         if (( ${SQL_MAINV} >=10 )) && (( ${SQL_SECV} >=4)); then
             mysql -u root -p${EXISTSQLPASS} \
                 -e "ALTER USER root@localhost IDENTIFIED VIA mysql_native_password USING PASSWORD('${root_mysql_pass}');"
-        else        
-            mysql -u root -p${EXISTSQLPASS} \     
-                -e "update mysql.user set authentication_string=password('${root_mysql_pass}') where user='root';" 
-        fi        
+        else
+            mysql -u root -p${EXISTSQLPASS} \
+                -e "update mysql.user set authentication_string=password('${root_mysql_pass}') where user='root';"
+        fi
     fi
-    if [ ! -e ${MARIADBCNF} ]; then 
+    if [ ! -e ${MARIADBCNF} ]; then
     touch ${MARIADBCNF}
-    cat > ${MARIADBCNF} <<END 
+    cat > ${MARIADBCNF} <<END
 [mysqld]
 sql_mode="NO_ENGINE_SUBSTITUTION,NO_AUTO_CREATE_USER"
 END
@@ -495,10 +495,10 @@ END
 
 db_password_file(){
     echoG 'Create db fiile'
-    if [ -f ${DBPASSPATH} ]; then 
+    if [ -f ${DBPASSPATH} ]; then
         echoY "${DBPASSPATH} already exist!, will recreate a new file"
         rm -f ${DBPASSPATH}
-    fi    
+    fi
     touch "${DBPASSPATH}"
     cat >> "${DBPASSPATH}" <<EOM
 root_mysql_pass="${root_mysql_pass}"
@@ -519,13 +519,13 @@ app_drupal_dl(){
 
 cache_plugin_dl(){
     echoG 'Download Cache Plugin'
-    if [ -d "${DOCHM}/web/modules" ] && [ ! -d "${DOCHM}/web/modules/lscache-drupal-master" ]; then 
+    if [ -d "${DOCHM}/web/modules" ] && [ ! -d "${DOCHM}/web/modules/lscache-drupal-master" ]; then
         cd ${DOCHM}/web/modules
-        wget https://github.com/litespeedtech/lscache-drupal/archive/master.zip -O master.zip -q 
+        wget https://github.com/litespeedtech/lscache-drupal/archive/master.zip -O master.zip -q
         unzip -qq master.zip
         rm -f master.zip
     else
-        echo 'Skip cache plugin download!'    
+        echo 'Skip cache plugin download!'
     fi
 }
 
@@ -551,77 +551,77 @@ ubuntu_firewall_add(){
     echoG 'Setting Firewall'
     for PORT in ${FIREWALLLIST}; do
         ufw allow ${PORT} > /dev/null 2>&1
-    done    
-    echo "y" | ufw enable > /dev/null 2>&1 
+    done
+    echo "y" | ufw enable > /dev/null 2>&1
     ufw status | grep '80.*ALLOW' > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'firewalld rules setup success'
-    else 
-        echoR 'Please check ufw rules'    
-    fi    
-    if [ ${PROVIDER} = 'oracle' ]; then 
+    else
+        echoR 'Please check ufw rules'
+    fi
+    if [ ${PROVIDER} = 'oracle' ]; then
         oci_iptables
     fi
 }
 
 centos_firewall_add(){
     echoG 'Setting Firewall'
-    if [ ! -e /usr/sbin/firewalld ]; then 
+    if [ ! -e /usr/sbin/firewalld ]; then
         yum -y install firewalld > /dev/null 2>&1
     fi
     service firewalld start  > /dev/null 2>&1
     systemctl enable firewalld > /dev/null 2>&1
-    for PORT in ${FIREWALLLIST}; do 
+    for PORT in ${FIREWALLLIST}; do
         firewall-cmd --permanent --add-port=${PORT}/tcp > /dev/null 2>&1
-    done 
+    done
     firewall-cmd --reload > /dev/null 2>&1
     firewall-cmd --list-all | grep 80 > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'firewalld rules setup success'
-    else 
-        echoR 'Please check firewalld rules'    
-    fi  
-    if [ ${PROVIDER} = 'oracle' ]; then 
+    else
+        echoR 'Please check firewalld rules'
+    fi
+    if [ ${PROVIDER} = 'oracle' ]; then
         oci_iptables
-    fi           
+    fi
 }
 
 ubuntu_service_check(){
     check_sql_ver
     for ITEM in lsws mariadb
-    do 
+    do
         service ${ITEM} status | grep "active\|running" > /dev/null 2>&1
-        if [ $? = 0 ]; then 
+        if [ $? = 0 ]; then
             echoG "Process ${ITEM} is active"
         else
-            echoR "Please check Process ${ITEM}" 
+            echoR "Please check Process ${ITEM}"
             ALLERRORS=1
         fi
-    done        
-    if [[ "${ALLERRORS}" = 0 ]]; then 
+    done
+    if [[ "${ALLERRORS}" = 0 ]]; then
         echoG "Congratulations! Installation finished."
     else
         echoR "Some errors seem to have occured, please check this as you may need to manually fix them"
-    fi        
+    fi
 }
 
 centos_service_check(){
     check_sql_ver
     for ITEM in lsws mariadb
-    do 
+    do
         service ${ITEM} status | grep "active\|running" > /dev/null 2>&1
-        if [ $? = 0 ]; then 
+        if [ $? = 0 ]; then
             echoG "Process ${ITEM} is active"
         else
-            echoR "Please check Process ${ITEM}" 
+            echoR "Please check Process ${ITEM}"
             ALLERRORS=1
         fi
-    done        
-    if [[ "${ALLERRORS}" = 0 ]]; then 
+    done
+    if [[ "${ALLERRORS}" = 0 ]]; then
         echoG "Congratulations! Installation finished."
     else
         echoR "Some errors seem to have occured, please check this as you may need to manually fix them"
-    fi        
+    fi
 }
 
 init_check(){
@@ -634,7 +634,7 @@ init_check(){
 init_setup(){
     system_upgrade
     prepare
-}   
+}
 
 centos_main_install(){
     centos_install_basic
@@ -667,8 +667,8 @@ ubuntu_main_install(){
 
 ubuntu_main_config(){
     ubuntu_config_ols
-    config_php 
-    app_main_config 
+    config_php
+    app_main_config
 }
 
 app_main_config(){

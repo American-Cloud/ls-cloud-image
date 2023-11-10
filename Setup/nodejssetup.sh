@@ -35,7 +35,7 @@ linechange(){
     if [ -n "$LINENUM" ] && [ "$LINENUM" -eq "$LINENUM" ] 2>/dev/null; then
         sed -i "${LINENUM}d" ${2}
         sed -i "${LINENUM}i${3}" ${2}
-    fi  
+    fi
 }
 
 check_os(){
@@ -45,28 +45,28 @@ check_os(){
         GROUP='nobody'
         OSVER=$(cat /etc/redhat-release | awk '{print substr($4,1,1)}')
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu  
+        OSNAME=ubuntu
         OSNAMEVER="UBUNTU$(lsb_release -sr | awk -F '.' '{print $1}')"
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 
 check_provider(){
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='aliyun'  
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-        PROVIDER='azure'  
+        PROVIDER='aliyun'
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+        PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'         
+        PROVIDER='oracle'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 
@@ -78,7 +78,7 @@ centos_sys_upgrade(){
     echoG 'Updating system'
     echo -ne '#                         (5%)\r'
     yum update -y > /dev/null 2>&1
-    echo -ne '#######################   (100%)\r'   
+    echo -ne '#######################   (100%)\r'
 }
 
 ubuntu_sys_upgrade(){
@@ -91,8 +91,8 @@ ubuntu_sys_upgrade(){
     echo -ne '####################      (99%)\r'
     apt-get clean > /dev/null 2>&1
     apt-get autoclean > /dev/null 2>&1
-    echo -ne '#######################   (100%)\r'    
-}    
+    echo -ne '#######################   (100%)\r'
+}
 
 centos_install_basic(){
     yum -y install wget > /dev/null 2>&1
@@ -105,7 +105,7 @@ ubuntu_install_basic(){
 install_ols(){
     cd /tmp/; wget -q https://raw.githubusercontent.com/litespeedtech/ols1clk/master/ols1clk.sh
     chmod +x ols1clk.sh
-    echo 'Y' | bash ols1clk.sh 
+    echo 'Y' | bash ols1clk.sh
 }
 
 centos_install_ols(){
@@ -129,9 +129,9 @@ ubuntu_install_nodejs(){
     echoG 'Install nodejs'
     ### Install nodejs with version 12 by using EPEL repository
     curl -sL https://deb.nodesource.com/setup_${NODEJSV}.x | sudo -E bash - > /dev/null 2>&1
-    apt-get install nodejs -y > /dev/null 2>&1 
+    apt-get install nodejs -y > /dev/null 2>&1
     echoG "NodeJS: $(node --version)"
-    echoG "NPM:    $(npm --version)"    
+    echoG "NPM:    $(npm --version)"
 }
 
 centos_install_certbot(){
@@ -145,14 +145,14 @@ centos_install_certbot(){
     else
         yum -y install certbot  > /dev/null 2>&1
     fi
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
         fi
         echoG 'Install CertBot finished'
-    else 
-        echoR 'Please check CertBot'    
-    fi    
+    else
+        echoR 'Please check CertBot'
+    fi
 }
 
 ubuntu_install_certbot(){
@@ -160,16 +160,16 @@ ubuntu_install_certbot(){
     if [ "${OSNAMEVER}" = 'UBUNTU18' ]; then
         add-apt-repository universe > /dev/null 2>&1
         echo -ne '\n' | add-apt-repository ppa:certbot/certbot > /dev/null 2>&1
-    fi   
+    fi
     apt-get update > /dev/null 2>&1
     apt-get -y install certbot > /dev/null 2>&1
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
         fi
         echoG 'Install CertBot finished'
-    else 
-        echoR 'Please check CertBot'    
+    else
+        echoR 'Please check CertBot'
     fi
 }
 
@@ -182,7 +182,7 @@ restart_lsws(){
 
 config_ols(){
     echoG 'Setting Web Server config'
-    cat > ${LSWSVHCONF} <<END 
+    cat > ${LSWSVHCONF} <<END
 docRoot                   \$VH_ROOT/html/
 enableGzip                1
 
@@ -259,11 +259,11 @@ END
 
 centos_set_ols(){
     config_ols
-}    
+}
 
 ubuntu_set_ols(){
     config_ols
-} 
+}
 
 acme_folder(){
     mkdir -p ${VHDOCROOT}/.well-known
@@ -311,7 +311,7 @@ oci_iptables(){
 
 centos_install_firewall(){
     echoG 'Install Firewall'
-    if [ ! -e /usr/sbin/firewalld ]; then 
+    if [ ! -e /usr/sbin/firewalld ]; then
         yum -y install firewalld > /dev/null 2>&1
     fi
     service firewalld start > /dev/null 2>&1
@@ -320,35 +320,35 @@ centos_install_firewall(){
 
 centos_config_firewall(){
     echoG 'Setting Firewall'
-    for PORT in ${FIREWALLLIST}; do 
+    for PORT in ${FIREWALLLIST}; do
         firewall-cmd --permanent --add-port=${PORT}/tcp > /dev/null 2>&1
-    done 
+    done
     firewall-cmd --reload > /dev/null 2>&1
     firewall-cmd --list-all | grep 80 > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'firewalld rules setup success'
-    else 
+    else
         echoR 'Please check firewalld rules'
-    fi 
+    fi
 }
 
 ubuntu_config_firewall(){
     echoG 'Setting Firewall'
     #ufw status verbose | grep inactive > /dev/null 2>&1
-    #if [ ${?} = 0 ]; then 
+    #if [ ${?} = 0 ]; then
     for PORT in ${FIREWALLLIST}; do
         ufw allow ${PORT} > /dev/null 2>&1
-    done    
+    done
     echo "y" | ufw enable > /dev/null 2>&1
 
     ufw status | grep '80.*ALLOW' > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'firewalld rules setup success'
-    else 
-        echoR 'Please check ufw rules'    
-    fi 
+    else
+        echoR 'Please check ufw rules'
+    fi
     #else
-    #    echoG "ufw already enabled"    
+    #    echoG "ufw already enabled"
     #fi
 }
 
@@ -378,12 +378,12 @@ centos_main_config(){
     centos_config_firewall
 }
 
-ubuntu_main_install(){    
+ubuntu_main_install(){
     ubuntu_install_basic
     ubuntu_install_ols
     ubuntu_install_nodejs
     ubuntu_install_certbot
-}    
+}
 
 ubuntu_main_config(){
     ubuntu_set_app
@@ -410,11 +410,11 @@ main(){
         ubuntu_main_config
     fi
     acme_folder
-    restart_lsws 
+    restart_lsws
     change_owner
     end_message
 }
 
 main
 #rm -- "$0"
-exit 0    
+exit 0

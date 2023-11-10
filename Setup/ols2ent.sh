@@ -36,26 +36,26 @@ check_os() {
 
 providerck() {
     if ! hash dmidecode > /dev/null 2>&1 ; then
-        if [[ $OSNAME == "ubuntu" ]] || [[ $OSNAME == "debian" ]] ; then 
+        if [[ $OSNAME == "ubuntu" ]] || [[ $OSNAME == "debian" ]] ; then
             apt install -y dmidecode
         fi
-        if [[ $OSNAME == "centos" ]] ; then 
+        if [[ $OSNAME == "centos" ]] ; then
             yum install -y dmidecode
-        fi 
-    fi 
-    
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+        fi
+    fi
+
+    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
         PROVIDER='aliyun'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
         PROVIDER='azure'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 
@@ -71,7 +71,7 @@ show_help() {
     echow '-L, --lsws'
     echo "${EPACE}${EPACE} Install and switch from OLS to LSWS. "
     echow '-R, --restore'
-    echo "${EPACE}${EPACE} Restore to OpenLiteSpeed. "    
+    echo "${EPACE}${EPACE} Restore to OpenLiteSpeed. "
     echow '-H, --help'
     echo "${EPACE}${EPACE}Display help and exit."
     exit 0
@@ -97,11 +97,11 @@ check_pkg_manage(){
     if hash apt > /dev/null 2>&1 ; then
         pkg_tool='apt'
         USER="www-data"
-        GROUP="www-data"      
+        GROUP="www-data"
     elif hash yum > /dev/null 2>&1 ; then
         pkg_tool='yum'
         USER="nobody"
-        GROUP="nobody"      
+        GROUP="nobody"
     else
       echo -e "can not detect package management tool ..."
       exit 1
@@ -228,7 +228,7 @@ restart_lsws(){
     else
         echo -e "Something went wrong , LSWS can not be started."
         exit 1
-    fi    
+    fi
 }
 
 check_return() {
@@ -253,7 +253,7 @@ gen_store_dir(){
         mkdir $STORE_DIR/conf/vhosts
     else
         rm -rf $STORE_DIR/conf/vhosts/*
-    fi    
+    fi
 }
 
 uninstall_ols() {
@@ -407,13 +407,13 @@ write_apache_conf() {
         else
             sed -i 's|replacement_key_file|'$LS_DIR'/admin/conf/webadmin.key|g' $STORE_DIR/httpd.conf
         fi
-        
+
         if [[ $phpmyadmin == "ON" ]] ; then
             sed -i 's|Alias /phpmyadmin/|Alias '$phpmyadmin_context'|g' $STORE_DIR/httpd.conf
         else
             sed -i '/phpmyadmin/d' $STORE_DIR/httpd.conf
         fi
-        
+
     fi
 
     if [[ $docRoot ==  "\$VH_ROOT" ]] ; then
@@ -568,19 +568,19 @@ check_ip(){
         server_ipv6="[$server_ipv6]"
         #enclose it with [ ] as Apache requires it
     fi
-    
-    if [[ $PROVIDER == "google" ]] ; then 
+
+    if [[ $PROVIDER == "google" ]] ; then
         server_ipv4="*"
-    fi 
-    #uses * for GCP , use public IP will make LSWS fail to bind to IP that does not show up in server 
-    #and result 404 on everything 
+    fi
+    #uses * for GCP , use public IP will make LSWS fail to bind to IP that does not show up in server
+    #and result 404 on everything
 }
 
 check_no_lsws(){
     if $LS_DIR/bin/lshttpd -v | grep -q Enterprise ; then
         echo -e "You have already installed LiteSpeed Enterprise..."
         exit 1
-    fi    
+    fi
 }
 
 gen_domain_list(){
@@ -628,7 +628,7 @@ main_to_lsws(){
     check_root_user
     check_no_lsws
     check_pkg_manage
-    gen_store_dir    
+    gen_store_dir
     check_ip
     licesne_input
     check_license
@@ -655,8 +655,7 @@ case ${1} in
     -[lL] | -lsws | --lsws)
         main_to_lsws; exit 0
         ;;
-    *) 
+    *)
         main_to_lsws; exit 0
-        ;;                  
+        ;;
 esac
-

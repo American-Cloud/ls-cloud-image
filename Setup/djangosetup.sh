@@ -40,7 +40,7 @@ linechange(){
     if [ -n "${LINENUM}" ] && [ "${LINENUM}" -eq "${LINENUM}" ] 2>/dev/null; then
         sed -i "${LINENUM}d" ${2}
         sed -i "${LINENUM}i${3}" ${2}
-    fi  
+    fi
 }
 
 check_os(){
@@ -50,28 +50,28 @@ check_os(){
         GROUP='nobody'
         OSVER=$(cat /etc/redhat-release | awk '{print substr($4,1,1)}')
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu   
-        OSNAMEVER="UBUNTU$(lsb_release -sr | awk -F '.' '{print $1}')"        
+        OSNAME=ubuntu
+        OSNAMEVER="UBUNTU$(lsb_release -sr | awk -F '.' '{print $1}')"
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 
 check_provider(){
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='aliyun'  
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-        PROVIDER='azure'    
+        PROVIDER='aliyun'
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+        PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'     
+        PROVIDER='oracle'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
   fi
 }
 
@@ -83,7 +83,7 @@ centos_sys_upgrade(){
     echoG 'Updating system'
     echo -ne '#                         (5%)\r'
     yum update -y > /dev/null 2>&1
-    echo -ne '#######################   (100%)\r'   
+    echo -ne '#######################   (100%)\r'
 }
 
 ubuntu_sys_upgrade(){
@@ -96,8 +96,8 @@ ubuntu_sys_upgrade(){
     echo -ne '####################      (99%)\r'
     apt-get clean > /dev/null 2>&1
     apt-get autoclean > /dev/null 2>&1
-    echo -ne '#######################   (100%)\r'    
-}    
+    echo -ne '#######################   (100%)\r'
+}
 
 centos_install_basic(){
     yum -y install wget > /dev/null 2>&1
@@ -138,24 +138,24 @@ centos_install_python(){
     cd sqlite-autoconf-*
     echoG 'Compiling from source code'
     ./configure > /dev/null 2>&1
-    if [ -e Makefile ]; then 
+    if [ -e Makefile ]; then
         make > /dev/null 2>&1
         make install > /dev/null 2>&1
-        if [ -e sqlite3 ]; then 
+        if [ -e sqlite3 ]; then
             echoG 'Make success, replacing sqlite bin file'
             if [ -e /usr/bin/sqlite3 ]; then
                 mv /usr/bin/sqlite3 /usr/bin/sqlite3.bk
-            fi    
+            fi
             mv sqlite3 /usr/bin/
             export LD_LIBRARY_PATH="/usr/local/lib"
             echo 'export LD_LIBRARY_PATH="/usr/local/lib"' >> /etc/profile
             echoG 'Finished sqlite3 compile'
         else
-            echoR 'Make Failed'    
+            echoR 'Make Failed'
         fi
-    else 
-        echoR 'Configure Failed'   
-    fi     
+    else
+        echoR 'Configure Failed'
+    fi
 }
 
 ubuntu_install_python(){
@@ -165,7 +165,7 @@ ubuntu_install_python(){
     apt-get install virtualenv -y > /dev/null 2>&1
     apt-get install socat -y > /dev/null 2>&1
     apt-get install build-essential -y > /dev/null 2>&1
-} 
+}
 
 centos_install_certbot(){
     echoG "Install CertBot"
@@ -178,32 +178,32 @@ centos_install_certbot(){
     else
         yum -y install certbot  > /dev/null 2>&1
     fi
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
         fi
         echoG 'Install CertBot finished'
-    else 
-        echoR 'Please check CertBot'    
-    fi    
+    else
+        echoR 'Please check CertBot'
+    fi
 }
 
-ubuntu_install_certbot(){       
-    echoG "Install CertBot" 
+ubuntu_install_certbot(){
+    echoG "Install CertBot"
     if [ "${OSNAMEVER}" = 'UBUNTU18' ]; then
         add-apt-repository universe > /dev/null 2>&1
         echo -ne '\n' | add-apt-repository ppa:certbot/certbot > /dev/null 2>&1
-    fi    
+    fi
     apt-get update > /dev/null 2>&1
     apt-get -y install certbot > /dev/null 2>&1
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
-        fi    
-        echoG 'Install CertBot finished'    
-    else 
-        echoR 'Please check CertBot'    
-    fi    
+        fi
+        echoG 'Install CertBot finished'
+    else
+        echoR 'Please check CertBot'
+    fi
 }
 
 restart_lsws(){
@@ -219,18 +219,18 @@ install_wsgi(){
     tar zxf /opt/${WSGINAME}.tgz -C /opt/
     cd /opt/${WSGINAME}/
     python3 ./configure.py | grep -i Done > /dev/null 2>&1
-    if [ ${?} = 0 ]; then  
+    if [ ${?} = 0 ]; then
         make > /dev/null 2>&1
-        if [ -e 'lswsgi' ]; then 
-            cp lswsgi ${LSWSFD}/fcgi-bin/    
+        if [ -e 'lswsgi' ]; then
+            cp lswsgi ${LSWSFD}/fcgi-bin/
             echoG 'Finish Build wsgi'
             cd /opt
             rm -rf /opt/${WSGINAME}*
         else
-            echoR 'Failed to Make' 
-        fi    
+            echoR 'Failed to Make'
+        fi
     else
-        echoR 'Failed to configure'    
+        echoR 'Failed to configure'
     fi
 }
 
@@ -244,7 +244,7 @@ ubuntu_install_wsgi(){
 
 config_venv_ols(){
     echoG 'Setting Web Server config'
-    cat > ${LSWSVHCONF} <<END 
+    cat > ${LSWSVHCONF} <<END
 docRoot                   \$VH_ROOT/html/
 enableGzip                1
 
@@ -323,7 +323,7 @@ END
 
 config_ols(){
     echoG 'Setting Web Server config'
-    cat > ${LSWSVHCONF} <<END 
+    cat > ${LSWSVHCONF} <<END
 docRoot                   \$VH_ROOT/html/
 enableGzip                1
 
@@ -401,18 +401,18 @@ END
 centos_set_ols(){
     if [ "${V_ENV}" = 'ON' ]; then
         config_venv_ols
-    else    
+    else
         config_ols
-    fi    
-}    
+    fi
+}
 
 ubuntu_set_ols(){
     if [ "${V_ENV}" = 'ON' ]; then
         config_venv_ols
-    else    
+    else
         config_ols
-    fi 
-} 
+    fi
+}
 
 get_envpy_ver(){
     PY_V="$(ls ${VHDOCROOT}/lib/ | head -1)"
@@ -422,7 +422,7 @@ centos_set_env(){
     if [ "${V_ENV}" = 'ON' ]; then
         echoG 'Setting django venv'
         virtualenv --system-site-packages -p /usr/bin/python3 ${VHDOCROOT} > /dev/null 2>&1
-        if [ ${?} = 1 ]; then 
+        if [ ${?} = 1 ]; then
             echoR 'Create virtualenv failed'
         fi
         echoG 'Source'
@@ -435,9 +435,9 @@ ubuntu_set_env(){
     if [ "${V_ENV}" = 'ON' ]; then
         echoG 'Setting django venv'
         virtualenv --system-site-packages -p python3 ${VHDOCROOT} > /dev/null 2>&1
-        if [ ${?} = 1 ]; then 
+        if [ ${?} = 1 ]; then
             echoR 'Create virtualenv failed'
-        fi    
+        fi
         echoG 'Source'
         source ${VHDOCROOT}/bin/activate
     fi
@@ -451,12 +451,12 @@ app_setup(){
     cd ${DEMOPROJECT}
     echoG 'Start app'
     python3 manage.py startapp ${PROJAPPNAME}
- 
+
     echoG 'update settings'
     NEWKEY="ALLOWED_HOSTS = ['*']"
     linechange 'ALLOWED_HOST' ${DEMOSETTINGS} "${NEWKEY}"
-    
-    cat >> ${DEMOSETTINGS} <<END 
+
+    cat >> ${DEMOSETTINGS} <<END
 STATIC_ROOT = '${DEMOPROJECT}/public/static'
 END
     echoG 'Collect files'
@@ -465,7 +465,7 @@ END
     python3 manage.py migrate > /dev/null 2>&1
 
     echoG 'update views'
-    cat > "${DEMOPROJECT}/${PROJAPPNAME}/views.py" <<END 
+    cat > "${DEMOPROJECT}/${PROJAPPNAME}/views.py" <<END
 from django.shortcuts import render
 from django.http import HttpResponse
 
@@ -474,7 +474,7 @@ def index(request):
 END
 
     echoG 'Update URLs'
-    cat > "${DEMOPROJECT}/${PROJNAME}/urls.py" <<END 
+    cat > "${DEMOPROJECT}/${PROJNAME}/urls.py" <<END
 """demo URL Configuration
 
 The \`urlpatterns\` list routes URLs to views. For more information please see:
@@ -501,7 +501,7 @@ urlpatterns = [
 END
     if [ "${V_ENV}" = 'ON' ]; then
         deactivate
-    fi    
+    fi
     echoG 'Finish django'
 }
 
@@ -533,7 +533,7 @@ oci_iptables(){
 
 centos_install_firewall(){
     echoG 'Install Firewall'
-    if [ ! -e /usr/sbin/firewalld ]; then 
+    if [ ! -e /usr/sbin/firewalld ]; then
         yum -y install firewalld > /dev/null 2>&1
     fi
     service firewalld start > /dev/null 2>&1
@@ -542,42 +542,42 @@ centos_install_firewall(){
 
 centos_config_firewall(){
     echoG 'Setting Firewall'
-    for PORT in ${FIREWALLLIST}; do 
+    for PORT in ${FIREWALLLIST}; do
         firewall-cmd --permanent --add-port=${PORT}/tcp > /dev/null 2>&1
-    done 
+    done
     firewall-cmd --reload > /dev/null 2>&1
     firewall-cmd --list-all | grep 80 > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'firewalld rules setup success'
-    else 
+    else
         echoR 'Please check firewalld rules'
-    fi 
-    if [ ${PROVIDER} = 'oracle' ]; then 
+    fi
+    if [ ${PROVIDER} = 'oracle' ]; then
         oci_iptables
-    fi    
+    fi
 }
 
 ubuntu_config_firewall(){
     echoG 'Setting Firewall'
     #ufw status verbose | grep inactive > /dev/null 2>&1
-    #if [ ${?} = 0 ]; then 
+    #if [ ${?} = 0 ]; then
     for PORT in ${FIREWALLLIST}; do
         ufw allow ${PORT} > /dev/null 2>&1
-    done    
+    done
     echo "y" | ufw enable > /dev/null 2>&1
 
     ufw status | grep '80.*ALLOW' > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'firewalld rules setup success'
-    else 
-        echoR 'Please check ufw rules'    
-    fi 
+    else
+        echoR 'Please check ufw rules'
+    fi
     #else
-    #    echoG "ufw already enabled"    
+    #    echoG "ufw already enabled"
     #fi
-    if [ ${PROVIDER} = 'oracle' ]; then 
+    if [ ${PROVIDER} = 'oracle' ]; then
         oci_iptables
-    fi    
+    fi
 }
 
 rm_dummy(){
@@ -590,7 +590,7 @@ init_check(){
     START_TIME="$(date -u +%s)"
     check_os
     check_provider
-} 
+}
 
 centos_main_install(){
     centos_install_basic
@@ -608,13 +608,13 @@ centos_main_config(){
     centos_config_firewall
 }
 
-ubuntu_main_install(){    
+ubuntu_main_install(){
     ubuntu_install_basic
     ubuntu_install_ols
     ubuntu_install_python
     ubuntu_install_certbot
     ubuntu_install_wsgi
-}    
+}
 
 ubuntu_main_config(){
     ubuntu_set_env
@@ -642,7 +642,7 @@ main(){
         ubuntu_main_config
     fi
     acme_folder
-    restart_lsws 
+    restart_lsws
     change_owner
     end_message
 }
@@ -654,4 +654,4 @@ case "${ARG1}" in
 esac
 
 main
-exit 0    
+exit 0

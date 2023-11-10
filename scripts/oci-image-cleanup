@@ -2,10 +2,10 @@
 # Copyright (c) 2018, 2021 Oracle and/or its affiliates. All rights reserved.
 # Licensed under the Universal Permissive License v 1.0 as shown
 # at http://oss.oracle.com/licenses/upl.
-      
+
 # This script runs a set of cleanup steps to prepare instance for snapshot
-     
-  
+
+
 # Globals
 TRUE=0
 FALSE=1
@@ -197,8 +197,8 @@ CLEAN_HISTORY_DATA_LOG=$CLEAN_HISTORY_DATA_LOG
 warn()
 {
     [[ $FORCE == ${TRUE} ]] || [[ $RESTORE == ${TRUE} ]] && return 0
-    
-    if grep "=YES" $CONFLOG |grep -E "_SSH_|_ROOT_" &>/dev/null; then 
+
+    if grep "=YES" $CONFLOG |grep -E "_SSH_|_ROOT_" &>/dev/null; then
         echo -e "\n\nWARNING!!!
 You will NOT be able to login to this instance once ssh keys and root passwd get removed!!!
 However, you can restore the information by running
@@ -211,7 +211,7 @@ for more information, run
     #if [[ "$input" = "R" ]]; then
     #    print_plan |tee -a $LOGFILE
     #    PLAN_PRINT=1
-    #    confirm || clean_and_abort 
+    #    confirm || clean_and_abort
     #fi
 }
 
@@ -474,13 +474,13 @@ restore()
 }
 
 # Main
-  
-if [ "$EUID" -ne 0 ]; then 
+
+if [ "$EUID" -ne 0 ]; then
     echo "This program needs to be run with root privileges."
     exit 1
 fi
 
-#trap 'clean_and_abort' SIGINT 
+#trap 'clean_and_abort' SIGINT
 
 CMD=$0
 RESTORE=${FALSE}
@@ -591,7 +591,7 @@ else
 	exit 0
     fi
 fi
-   
+
 if [[ $DRYRUN = ${TRUE} ]]; then
     print_plan |tee -a $LOGFILE
     PLAN_PRINT=1

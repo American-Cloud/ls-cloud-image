@@ -10,10 +10,10 @@ setup ()
     if [ -f /etc/redhat-release ] ; then
         OSNAME=centos
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu    
+        OSNAME=ubuntu
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
   }
   check_os
   cat << EOF > ${CLDINITPATH}/per-instance.sh
@@ -30,9 +30,9 @@ EDITION=''
 LSDIR='/usr/local/lsws'
 CONTEXTPATH="\${LSDIR}/Example"
 LSHTTPDCFPATH="\${LSDIR}/conf/httpd_config.conf"
-if [ -e "\${LSDIR}/conf/vhosts/wordpress/vhconf.conf" ]; then 
+if [ -e "\${LSDIR}/conf/vhosts/wordpress/vhconf.conf" ]; then
     LSVHCFPATH="\${LSDIR}/conf/vhosts/wordpress/vhconf.conf"
-else 
+else
     LSVHCFPATH="\${LSDIR}/conf/vhosts/Example/vhconf.conf"
 fi
 CLOUDPERINSTPATH='/var/lib/cloud/scripts/per-instance'
@@ -43,14 +43,14 @@ check_os(){
     if [ -f /etc/redhat-release ] ; then
         OSNAME=centos
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu    
+        OSNAME=ubuntu
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 check_os
 
-editioncheck() 
+editioncheck()
 {
   if [ -d /usr/local/CyberCP ]; then
     PANEL='cyber'
@@ -69,49 +69,49 @@ editioncheck()
     PANEL='direct'
     PANELPATH='/usr/local/directadmin'
   fi
-  if [ -e \${LSDIR}/bin/openlitespeed ]; then 
+  if [ -e \${LSDIR}/bin/openlitespeed ]; then
     EDITION='openlitespeed'
   elif [ -e \${LSDIR}/bin/litespeed ]; then
     EDITION='litespeed'
-  fi  
+  fi
 }
 editioncheck
 
 providerck()
 {
-  if [ "\$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" = 'EC2' ] && [ -d /home/ubuntu ]; then 
+  if [ "\$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" = 'EC2' ] && [ -d /home/ubuntu ]; then
     PROVIDER='aws'
   elif [ "\$(dmidecode -s bios-vendor)" = 'Google' ];then
-    PROVIDER='google'      
+    PROVIDER='google'
   elif [ "\$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
     PROVIDER='do'
   elif [ "\$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-    PROVIDER='aliyun'  
-  elif [ "\$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-    PROVIDER='azure'  
+    PROVIDER='aliyun'
+  elif [ "\$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+    PROVIDER='azure'
   else
-    PROVIDER='undefined'  
+    PROVIDER='undefined'
   fi
 }
 providerck
 
 pathupdate()
 {
-  if [ "\${PANEL}" = 'cyber' ]; then  
+  if [ "\${PANEL}" = 'cyber' ]; then
     PHPMYPATH="\${PANELPATH}/public/phpmyadmin"
     WPCT="\${PROVIDER}_ols_cyberpanel"
   elif [ "\${PANEL}" = '' ]; then
-    PHPMYPATH='/var/www/phpmyadmin'  
+    PHPMYPATH='/var/www/phpmyadmin'
     DOCPATH=\$(grep 'docRoot' \${LSVHCFPATH} | awk '{print \$2}')
     echo \${DOCPATH} | grep 'old' > /dev/null
     if [ \$? -eq 0 ]; then
       DOCPATH=\${DOCPATH::-5}
       DOCPATH=\${DOCPATH}/
-    fi 
+    fi
     if [ "\$(echo \${DOCPATH} | grep '\\$')" != '' ]; then
       VHROOTURL=\$(echo \${DOCPATH} | sed 's/\$VH_ROOT\\///')
       DOCPATH="\${LSDIR}/Example/\${VHROOTURL}/"
-    fi 
+    fi
     if [ -f '/usr/bin/node' ] && [ "\$(grep -n 'appType.*node' \${LSVHCFPATH})" != '' ]; then
       APPLICATION='NODE'
       WPCT="\${PROVIDER}_ols_node"
@@ -123,12 +123,12 @@ pathupdate()
       CONTEXTPATH="\${LSDIR}/Example/demo/demo/settings.py"
       WPCT="\${PROVIDER}_ols_python"
     else
-      APPLICATION='NONE'  
+      APPLICATION='NONE'
       WPCT="\${PROVIDER}_ols_wordpress"
-    fi  
-  fi 
+    fi
+  fi
   PHPMYCFPATH="\${PHPMYPATH}/config.inc.php"
-  if [ -f "\${DOCPATH}/wp-config.php" ]; then 
+  if [ -f "\${DOCPATH}/wp-config.php" ]; then
     WPCFPATH="\${DOCPATH}wp-config.php"
   fi
 
@@ -136,12 +136,12 @@ pathupdate()
 pathupdate
 oshmpath()
 {
-  if [ \${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then 
+  if [ \${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then
     HMPATH='/home/ubuntu'
     PUBIP=\$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
-  elif [ \${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then 
+  elif [ \${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then
     HMPATH='/home/ubuntu'
-    PUBIP=\$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)    
+    PUBIP=\$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
   elif [ \${PROVIDER} = 'aliyun' ] && [ -d /home/ubuntu ]; then
     HMPATH='/home/ubuntu'
     PUBIP=\$(curl http://100.100.100.200/latest/meta-data/eipv4)
@@ -149,30 +149,30 @@ oshmpath()
     HMPATH='/root'
     #PUBIP=\$(ifconfig eth0 | grep 'inet '| awk '{printf \$2}')
     PUBIP=\$(ip -4 route get 8.8.8.8 | awk {'print \$7'} | tr -d '\n')
-  fi    
+  fi
 }
 oshmpath
 
 doimgversionct()
-{ 
+{
   curl "https://wp.api.litespeedtech.com/v?t=image&src=\${WPCT}" > /dev/null 2>&1
 }
 
 dbpasswordfile()
 {
   if [ "\${APPLICATION}" = 'NONE' ] || [ "\${PANEL}" = 'cyber' ]; then
-    if [ ! -e "\${HMPATH}/.db_password" ]; then 
+    if [ ! -e "\${HMPATH}/.db_password" ]; then
       touch "\${HMPATH}/.db_password"
       DBPASSPATH="\${HMPATH}/.db_password"
     else
       DBPASSPATH="\${HMPATH}/.db_password"
-      ori_root_mysql_pass=\$(grep 'root_mysql_pass' \${DBPASSPATH} | awk -F'=' '{print \$2}' | tr -d '"')  
+      ori_root_mysql_pass=\$(grep 'root_mysql_pass' \${DBPASSPATH} | awk -F'=' '{print \$2}' | tr -d '"')
     fi
-  fi  
+  fi
 }
 litespeedpasswordfile()
 {
-  if [ ! -e "\${HMPATH}/.litespeed_password" ]; then 
+  if [ ! -e "\${HMPATH}/.litespeed_password" ]; then
     touch "\${HMPATH}/.litespeed_password"
   fi
   LSPASSPATH="\${HMPATH}/.litespeed_password"
@@ -185,7 +185,7 @@ APP_POSTFIX_EMAIL2EMAIL_CF='/etc/postfix/mysql-virtual_email2email.cf'
 APP_POSTFIX_FORWARDINGS_CF='/etc/postfix/mysql-virtual_forwardings.cf'
 APP_POSTFIX_MAILBOXES_CF='/etc/postfix/mysql-virtual_mailboxes.cf'
 
-if [ \${OSNAME} = 'ubuntu' ] || [ \${OSNAME} = 'debian' ]; then 
+if [ \${OSNAME} = 'ubuntu' ] || [ \${OSNAME} = 'debian' ]; then
   ## pure-ftpd
   APP_PUREFTP_CF='/etc/pure-ftpd/pureftpd-mysql.conf'
   APP_PUREFTPDB_CF='/etc/pure-ftpd/db/mysql.conf'
@@ -219,7 +219,7 @@ gensecretkey(){
   GEN_SECRET=\$(</dev/urandom tr -dc 'a-zA-Z0-9!@#%^&*()-_[]{}<>~+=' | head -c 50 | sed -e 's/[\/&]/\\&/g')
 }
 gen_selfsigned_cert()
-{  
+{
   # set default value
   SSL_HOSTNAME=webadmin
   csr="\${SSL_HOSTNAME}.csr"
@@ -244,7 +244,7 @@ csrconf
 # Create the Certificate
   openssl x509 -in \${csr} -out \${cert} -req -signkey \${key} -days 1000 >/dev/null 2>&1
 # Remove file
-  rm -f \${SSL_HOSTNAME}.csr 
+  rm -f \${SSL_HOSTNAME}.csr
   rm -f privkey.pem
 }
 
@@ -254,7 +254,7 @@ linechange(){
   if [ -n "\$LINENUM" ] && [ "\$LINENUM" -eq "\$LINENUM" ] 2>/dev/null; then
     sed -i "\${LINENUM}d" \${2}
     sed -i "\${LINENUM}i\${3}" \${2}
-  fi  
+  fi
 }
 
 ### Update/Renew password/key ###
@@ -263,7 +263,7 @@ lscpd_cert_update()
   if [ "\${PANEL}" = 'cyber' ]; then
     cp \${SSL_HOSTNAME}.crt \${LSCPPATH}/conf/cert.pem
     cp \${SSL_HOSTNAME}.key \${LSCPPATH}/conf/key.pem
-  fi  
+  fi
 }
 
 web_admin_update()
@@ -277,9 +277,9 @@ web_admin_update()
 
 panel_admin_update()
 {
-  if [ "\${PANEL}" = 'cyber' ]; then   
+  if [ "\${PANEL}" = 'cyber' ]; then
     python \${PANELPATH}/plogical/adminPass.py --password \${ADMIN_PASS}
-  fi  
+  fi
 }
 
 panel_sshkey_update()
@@ -297,17 +297,17 @@ panel_IP_update()
 }
 
 filepermission_update(){
-  chmod 600 \${HMPATH}/.db_password 
+  chmod 600 \${HMPATH}/.db_password
   chmod 600 \${HMPATH}/.litespeed_password
 }
 
 updatesecretkey(){
-  if [ "\${PANEL}" = 'cyber' ]; then 
+  if [ "\${PANEL}" = 'cyber' ]; then
     SECRETPATH=\${CPCFPATH}
-  elif [ "\${APPLICATION}" = 'PYTHON' ]; then  
-    SECRETPATH=\${CONTEXTPATH}  
-  fi  
-  LINENUM=\$(grep -n 'SECRET_KEY' \${SECRETPATH} | cut -d: -f 1) 
+  elif [ "\${APPLICATION}" = 'PYTHON' ]; then
+    SECRETPATH=\${CONTEXTPATH}
+  fi
+  LINENUM=\$(grep -n 'SECRET_KEY' \${SECRETPATH} | cut -d: -f 1)
   sed -i "\${LINENUM}d" \${SECRETPATH}
   NEWKEY="SECRET_KEY = '\${GEN_SECRET}'"
   sed -i "\${LINENUM}i\${NEWKEY}" \${SECRETPATH}
@@ -315,17 +315,17 @@ updatesecretkey(){
 
 updateCPsqlpwd(){
   PREPWD=\$(cat \${CPSQLPATH})
-### root user 
+### root user
   mysql -uroot -p\${PREPWD} \\
         -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('\${root_mysql_pass}');"
 
-    for LINENUM in \$(grep -n "'PASSWORD':" \${CPCFPATH} | cut -d: -f 1); 
-      do 
+    for LINENUM in \$(grep -n "'PASSWORD':" \${CPCFPATH} | cut -d: -f 1);
+      do
         NEWDBPWD="        'PASSWORD': '\${root_mysql_pass}',"
         sed -i "\${LINENUM}s/.*/\${NEWDBPWD}/" \${CPCFPATH}
       done
     sed -i "1s/.*/\${root_mysql_pass}/" \${CPSQLPATH}
-### cyberpanel user    
+### cyberpanel user
     mysql -uroot -p\${root_mysql_pass} \\
         -e "SET PASSWORD FOR 'cyberpanel'@'localhost' = PASSWORD('\${root_mysql_pass}');"
 
@@ -345,12 +345,12 @@ updateCPsqlpwd(){
   NEWKEY="MYSQLPassword \${root_mysql_pass}"
   linechange 'MYSQLPassword' \${APP_PUREFTP_CF} "\${NEWKEY}"
   linechange 'MYSQLPassword' \${APP_PUREFTPDB_CF} "\${NEWKEY}"
-  if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then 
+  if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then
       systemctl restart pure-ftpd-mysql.service
-  elif [ "${OSNAME}" = 'centos' ]; then 
+  elif [ "${OSNAME}" = 'centos' ]; then
       service pure-ftpd restart
-  fi    
-  
+  fi
+
 #### powerdns
   NEWKEY="gmysql-password=\${root_mysql_pass}"
   linechange 'gmysql-password' \${APP_POWERDNS_CF} "\${NEWKEY}"
@@ -373,7 +373,7 @@ for LINENUM in \$(grep -n 'map' \${LSHTTPDCFPATH} | cut -d: -f 1)
     NEWDBPWD="  map                     wordpress \${PUBIP}"
 #    NEWDBPWD="  map                     Example \${PUBIP}"
     sed -i "\${LINENUM}s/.*/\${NEWDBPWD}/" \${LSHTTPDCFPATH}
-  done  
+  done
 }
 
 updatesqlpwd(){
@@ -463,21 +463,21 @@ afterssh(){
     LINENUM=\$(grep -n 'R.*/index.html.*R' \${LSVHCFPATH} | tail -1 | cut -d: -f 1)
     sudo sed -i "\${LINENUM}d" \${LSVHCFPATH}
   fi
-  if [ \${PROVIDER} = 'google' ]; then 
+  if [ \${PROVIDER} = 'google' ]; then
       \${HMPATH}='/home/ubuntu'
-  fi    
+  fi
   sudo sed -i '/afterssh.sh/d' /etc/profile
   sudo service lsws restart
 }
 
 aftersshsetup(){
-  if [ \${PROVIDER} = 'google' ]; then 
+  if [ \${PROVIDER} = 'google' ]; then
       \${HMPATH}='/home/ubuntu'
-  fi   
+  fi
   if [ -e '/opt/afterssh.sh' ]; then
     sudo rm -rf /opt/afterssh.sh
   fi
- 
+
   sudo cat << EOM > /opt/afterssh.sh
 #!/bin/bash
 source \${CLOUDPERINSTPATH}/per-instance.sh >> /dev/null 2>&1
@@ -498,7 +498,7 @@ beforessh(){
     NEWKEY='RewriteRule ^(.*)\$ http://%{SERVER_NAME}/index.html [R,L]'
     LINENUM=\$(grep -n '}' \${LSVHCFPATH} | tail -1 | cut -d: -f 1)
     sed -i "\${LINENUM}i\${NEWKEY}" \${LSVHCFPATH}
-  fi  
+  fi
   sudo service lsws restart
   echo "/opt/afterssh.sh" >> /etc/profile
   echo "/opt/domainsetup.sh" >> /etc/profile
@@ -508,7 +508,7 @@ deleteinstancesh(){
   if [ ! -f \${HMPATH}/afterssh.sh ]; then
     sudo rm -f \${CLOUDPERINSTPATH}/per-instance.sh
   fi
-  if [ "\$1" = '-f' ]; then 
+  if [ "\$1" = '-f' ]; then
     sudo rm -f \${CLOUDPERINSTPATH}/per-instance.sh
   fi
 }
@@ -591,7 +591,7 @@ check_version() {
 }
 
 update_phpmyadmin() {
-  INSTALL_PATH="\${PHPMYPATH}"  
+  INSTALL_PATH="\${PHPMYPATH}"
   LOCAL_VERSION=\$(cat \${INSTALL_PATH}/ChangeLog | head -n4 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]')
   LATEST_VERSION=\$(curl -s https://www.phpmyadmin.net/home_page/version.php | head -n1)
   URL="https://files.phpmyadmin.net/phpMyAdmin/\${LATEST_VERSION}/phpMyAdmin-\${LATEST_VERSION}-all-languages.zip"
@@ -610,10 +610,10 @@ update_phpmyadmin() {
       chown -R \${USER}:\${GROUP} \${INSTALL_PATH}/
      else
       USER='www-data'
-      GROUP='www-data'      
-      chown -R \${USER}:\${GROUP} \${INSTALL_PATH}/  
-    fi  
-    sudo rm -rf /tmp/phpMyAdmin-\${LATEST_VERSION}-all-languages* 
+      GROUP='www-data'
+      chown -R \${USER}:\${GROUP} \${INSTALL_PATH}/
+    fi
+    sudo rm -rf /tmp/phpMyAdmin-\${LATEST_VERSION}-all-languages*
   fi
 }
 
@@ -670,9 +670,9 @@ maincloud(){
     updateCPpwdfile
     filepermission_update
     renewblowfish
-    if [ "\${OSNAME}" != 'centos' ]; then 
+    if [ "\${OSNAME}" != 'centos' ]; then
         installfirewalld
-    fi    
+    fi
   elif [ "\${APPLICATION}" = 'PYTHON' ]; then
     updatesecretkey
   elif [ "\${APPLICATION}" = 'NONE' ]; then
@@ -752,7 +752,7 @@ cleanup (){
   rm -f /var/log/mail.log*
   rm -f /var/log/mail.err
   rm -f /var/log/letsencrypt/letsencrypt.log*
-  rm -f /var/log/fail2ban.log* 
+  rm -f /var/log/fail2ban.log*
   rm -f /var/log/mysql/error.log
   rm -f /etc/mysql/debian.cnf
   rm -f /var/log/redis/redis-server.log
@@ -773,16 +773,16 @@ cleanup (){
   if [ "$(cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" = 'EC2' ] && [ -d /home/ubuntu ]; then
     rm -f /home/ubuntu/.mysql_history
     rm -f /home/ubuntu/.bash_history
-    rm -f /home/ubuntu/.ssh/authorized_keys   
+    rm -f /home/ubuntu/.ssh/authorized_keys
     rm -f /home/ubuntu/.litespeed_password
-  fi  
+  fi
   if [ "$(dmidecode -s bios-vendor)" = 'Google' ]; then
     allhmfolder=$(ls /home/)
     for i in ${allhmfolder[@]}; do
       if [ "${i}" != 'ubuntu' ]; then
         rm -rf "/home/${i}"
       fi
-    done  
+    done
   fi
 }
 

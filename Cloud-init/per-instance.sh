@@ -12,11 +12,11 @@ LSHTTPDCFPATH="${LSDIR}/conf/httpd_config.conf"
 if [ -e "${LSDIR}/conf/vhosts/wordpress/vhconf.conf" ]; then
     LSVHCFPATH="${LSDIR}/conf/vhosts/wordpress/vhconf.conf"
 elif [ -e "${LSDIR}/conf/vhosts/classicpress/vhconf.conf" ]; then
-    LSVHCFPATH="${LSDIR}/conf/vhosts/classicpress/vhconf.conf"    
+    LSVHCFPATH="${LSDIR}/conf/vhosts/classicpress/vhconf.conf"
 elif [ -e "${LSDIR}/conf/vhosts/joomla/vhconf.conf" ]; then
     LSVHCFPATH="${LSDIR}/conf/vhosts/joomla/vhconf.conf"
 elif [ -e "${LSDIR}/conf/vhosts/drupal/vhconf.conf" ]; then
-    LSVHCFPATH="${LSDIR}/conf/vhosts/drupal/vhconf.conf"        
+    LSVHCFPATH="${LSDIR}/conf/vhosts/drupal/vhconf.conf"
 else
     LSVHCFPATH="${LSDIR}/conf/vhosts/Example/vhconf.conf"
 fi
@@ -33,12 +33,12 @@ check_os(){
         OSNAME=centos
         BANNERDST='/etc/profile.d/99-one-click.sh'
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu   
+        OSNAME=ubuntu
         BANNERDST='/etc/update-motd.d/99-one-click'
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
         BANNERDST='/etc/update-motd.d/99-one-click'
-    fi        
+    fi
 }
 
 check_edition()
@@ -65,37 +65,37 @@ check_edition()
         EDITION='openlitespeed'
     elif [ -e ${LSDIR}/bin/litespeed ]; then
         EDITION='litespeed'
-    fi 
+    fi
 }
 
 check_provider()
 {
     if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
-        PROVIDER='aws'    
+        PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'     
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s bios-vendor)" = 'Vultr' ];then
-        PROVIDER='vultr'        
+        PROVIDER='vultr'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
         PROVIDER='ali'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-        PROVIDER='azure'   
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+        PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'             
-    elif [ -e /root/StackScript ]; then 
-        if grep -q 'linode' /root/StackScript; then 
+        PROVIDER='oracle'
+    elif [ -e /root/StackScript ]; then
+        if grep -q 'linode' /root/StackScript; then
             PROVIDER='linode'
         fi
     else
-        PROVIDER='undefined' 
+        PROVIDER='undefined'
     fi
 }
 
 update_path()
 {
-    if [ "${PANEL}" = 'cyber' ]; then 
+    if [ "${PANEL}" = 'cyber' ]; then
         PHPMYPATH="${PANELPATH}/public/phpmyadmin"
         WPCT="${PROVIDER}_ols_cyberpanel"
         if [ -e "${APPNAME_PATH}" ]; then
@@ -124,13 +124,13 @@ update_path()
             APP_PUREFTP_CF='/etc/pure-ftpd/pureftpd-mysql.conf'
             APP_PUREFTPDB_CF='/etc/pure-ftpd/pureftpd-mysql.conf'
             APP_POWERDNS_CF='/etc/pdns/pdns.conf'
-        fi        
+        fi
     elif [ "${PANEL}" = '' ]; then
-        PHPMYPATH='/var/www/phpmyadmin' 
+        PHPMYPATH='/var/www/phpmyadmin'
         DOCPATH='/var/www/html'
         if [ ${EDITION} = 'litespeed' ]; then
             WPCT="${PROVIDER}_lsws"
-            BANNERNAME='litespeed'         
+            BANNERNAME='litespeed'
         elif [ -f '/usr/bin/node' ] && [ "$(grep -n 'appType.*node' ${LSVHCFPATH})" != '' ]; then
             APPLICATION='NODE'
             WPCT="${PROVIDER}_ols_node"
@@ -143,27 +143,27 @@ update_path()
             APPLICATION='PYTHON'
             CONTEXTPATH="${LSDIR}/Example/html/demo/demo/settings.py"
             WPCT="${PROVIDER}_ols_python"
-            BANNERNAME='django'      
+            BANNERNAME='django'
         else
-            APPLICATION='CMS' 
+            APPLICATION='CMS'
             DOCPATH='/var/www/html.old'
-            if [ -d ${DOCPATH}/administrator ]; then 
+            if [ -d ${DOCPATH}/administrator ]; then
                 WPCT="${PROVIDER}_ols_joomla"
                 BANNERNAME='joomla'
-            elif [ -d ${DOCPATH}/web/sites ]; then 
+            elif [ -d ${DOCPATH}/web/sites ]; then
                 WPCT="${PROVIDER}_ols_drupal"
-                BANNERNAME='drupal'                
-            else 
+                BANNERNAME='drupal'
+            else
                 grep -i ClassicPress ${DOCPATH}/license.txt >/dev/null
                 if [ ${?} = 0 ]; then
                     WPCT="${PROVIDER}_ols_classicpress"
-                    BANNERNAME='classicpress'       
+                    BANNERNAME='classicpress'
                 else
                     WPCT="${PROVIDER}_ols_wordpress"
                     BANNERNAME='wordpress'
                 fi
-            fi    
-        fi 
+            fi
+        fi
     fi
     PHPMYCFPATH="${PHPMYPATH}/config.inc.php"
     if [ -f "${DOCPATH}/wp-config.php" ]; then
@@ -178,20 +178,20 @@ os_home_path()
         PUBIP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
     elif [ ${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
-        PUBIP=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)   
+        PUBIP=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
     elif [ ${PROVIDER} = 'ali' ]; then
         HMPATH='/root'
-        PUBIP=$(curl http://100.100.100.200/latest/meta-data/eipv4)   
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
+        PUBIP=$(curl http://100.100.100.200/latest/meta-data/eipv4)
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
         HMPATH='/root'
         PUBIP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")
     elif [ -e /etc/oracle-cloud-agent/ ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
-        PUBIP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")     
+        PUBIP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")
     else
         HMPATH='/root'
         PUBIP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")
-    fi   
+    fi
 }
 
 main_env_check(){
@@ -204,7 +204,7 @@ main_env_check(){
 main_env_check
 
 rm_dummy(){
-    if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then 
+    if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then
         rm -f /etc/update-motd.d/00-header
         rm -f /etc/update-motd.d/10-help-text
         rm -f /etc/update-motd.d/50-landscape-sysinfo
@@ -234,15 +234,15 @@ setup_domain(){
             curl -s https://cloud.litespeed.sh/Setup/domainsetup.sh -o /opt/domainsetup.sh
         fi
         chmod +x /opt/domainsetup.sh
-    fi    
-}    
+    fi
+}
 setup_banner(){
     if [ ! -e ${BANNERDST} ]; then
         STATUS="$(curl -s https://raw.githubusercontent.com/litespeedtech/ls-cloud-image/master/Banner/${BANNERNAME} \
-        -o ${BANNERDST} -w "%{http_code}")"  
+        -o ${BANNERDST} -w "%{http_code}")"
         if [ ${?} != 0 ] || [ "${STATUS}" != '200' ]; then
             curl -s https://cloud.litespeed.sh/Banner/${BANNERNAME} -o ${BANNERDST}
-        fi  
+        fi
         chmod +x ${BANNERDST}
     fi
 }
@@ -255,9 +255,9 @@ db_passwordfile()
             DBPASSPATH="${HMPATH}/.db_password"
         else
             DBPASSPATH="${HMPATH}/.db_password"
-            ori_root_mysql_pass=$(grep 'root_mysql_pass' ${DBPASSPATH} | awk -F'=' '{print $2}' | tr -d '"') 
+            ori_root_mysql_pass=$(grep 'root_mysql_pass' ${DBPASSPATH} | awk -F'=' '{print $2}' | tr -d '"')
         fi
-    fi 
+    fi
 }
 litespeed_passwordfile()
 {
@@ -285,7 +285,7 @@ gen_secretkey(){
     GEN_SECRET=$(</dev/urandom tr -dc 'a-zA-Z0-9!@#%^&*()-_[]{}<>~+=' | head -c 50 | sed -e 's/[\/&]/\&/g')
 }
 gen_selfsigned_cert()
-{ 
+{
     SSL_HOSTNAME=webadmin
     csr="${SSL_HOSTNAME}.csr"
     key="${SSL_HOSTNAME}.key"
@@ -314,7 +314,7 @@ linechange(){
     if [ -n "$LINENUM" ] && [ "$LINENUM" -eq "$LINENUM" ] 2>/dev/null; then
         sed -i "${LINENUM}d" ${2}
         sed -i "${LINENUM}i${3}" ${2}
-    fi 
+    fi
 }
 
 lscpd_cert_update()
@@ -322,7 +322,7 @@ lscpd_cert_update()
     if [ "${PANEL}" = 'cyber' ]; then
         cp ${SSL_HOSTNAME}.crt ${LSCPPATH}/conf/cert.pem
         cp ${SSL_HOSTNAME}.key ${LSCPPATH}/conf/key.pem
-    fi 
+    fi
 }
 
 web_admin_update()
@@ -335,13 +335,13 @@ web_admin_update()
 
 panel_admin_update()
 {
-    if [ "${PANEL}" = 'cyber' ]; then  
+    if [ "${PANEL}" = 'cyber' ]; then
         if [ -f /usr/local/CyberPanel/bin/python2 ]; then
             /usr/local/CyberPanel/bin/python2 ${PANELPATH}/plogical/adminPass.py --password ${ADMIN_PASS}
         else
             /usr/local/CyberPanel/bin/python ${PANELPATH}/plogical/adminPass.py --password ${ADMIN_PASS}
-        fi    
-    fi 
+        fi
+    fi
 }
 
 panel_sshkey_update()
@@ -362,7 +362,7 @@ passftp_IP_update(){
     if [ "${PANEL}" = 'cyber' ]; then
         if [ ${OSNAME} = 'ubuntu' ] || [ ${OSNAME} = 'debian' ]; then
             cat "${CPIPPATH}" > /etc/pure-ftpd/conf/ForcePassiveIP
-        fi    
+        fi
     fi
 }
 
@@ -374,9 +374,9 @@ filepermission_update(){
 update_secretkey(){
     if [ "${PANEL}" = 'cyber' ]; then
         SECRETPATH=${CPCFPATH}
-    elif [ "${APPLICATION}" = 'PYTHON' ]; then 
-        SECRETPATH=${CONTEXTPATH} 
-    fi 
+    elif [ "${APPLICATION}" = 'PYTHON' ]; then
+        SECRETPATH=${CONTEXTPATH}
+    fi
     LINENUM=$(grep -n 'SECRET_KEY' ${SECRETPATH} | cut -d: -f 1)
     sed -i "${LINENUM}d" ${SECRETPATH}
     NEWKEY="SECRET_KEY = '${GEN_SECRET}'"
@@ -394,7 +394,7 @@ update_CPsqlpwd(){
         sed -i "${LINENUM}s/.*/${NEWDBPWD}/" ${CPCFPATH}
     done
     sed -i "1s/.*/${root_mysql_pass}/" ${CPSQLPATH}
-    ### cyberpanel user   
+    ### cyberpanel user
     mysql -uroot -p${root_mysql_pass} \
         -e "SET PASSWORD FOR 'cyberpanel'@'localhost' = PASSWORD('${root_mysql_pass}');"
 
@@ -418,7 +418,7 @@ update_CPsqlpwd(){
         systemctl restart pure-ftpd-mysql.service
     elif [ "${OSNAME}" = 'centos' ]; then
         service pure-ftpd restart
-    fi   
+    fi
     #### powerdns
     NEWKEY="gmysql-password=${root_mysql_pass}"
     linechange 'gmysql-password' ${APP_POWERDNS_CF} "${NEWKEY}"
@@ -432,11 +432,11 @@ renew_wp_pwd(){
 }
 
 replace_litenerip(){
-    if [ "${EDITION}" != 'litespeed' ]; then 
-        if [ "${PROVIDER}" = 'do' ] && [ "${PANEL}" = '' ]; then 
+    if [ "${EDITION}" != 'litespeed' ]; then
+        if [ "${PROVIDER}" = 'do' ] && [ "${PANEL}" = '' ]; then
             for LINENUM in $(grep -n 'map' ${LSHTTPDCFPATH} | cut -d: -f 1)
             do
-                if [ -e /var/www/html ] || [ -e /var/www/html.old ]; then 
+                if [ -e /var/www/html ] || [ -e /var/www/html.old ]; then
                     if [ "${BANNERNAME}" = 'wordpress' ]; then
                         NEWDBPWD="  map                     wordpress ${PUBIP}"
                     elif [ "${BANNERNAME}" = 'classicpress' ]; then
@@ -444,14 +444,14 @@ replace_litenerip(){
                     elif [ "${BANNERNAME}" = 'joomla' ]; then
                         NEWDBPWD="  map                     joomla ${PUBIP}"
                     elif [ "${BANNERNAME}" = 'drupal' ]; then
-                        NEWDBPWD="  map                     drupal ${PUBIP}"                    
-                    fi    
+                        NEWDBPWD="  map                     drupal ${PUBIP}"
+                    fi
                 else
                     NEWDBPWD="  map                     Example ${PUBIP}"
-                fi    
+                fi
                 sed -i "${LINENUM}s/.*/${NEWDBPWD}/" ${LSHTTPDCFPATH}
-            done 
-        fi    
+            done
+        fi
     fi
 }
 
@@ -477,8 +477,8 @@ update_sql_pwd(){
         mysql -uroot -p${root_mysql_pass} \
             -e "SET PASSWORD FOR 'drupal'@'localhost' = PASSWORD('${app_mysql_pass}');"
         mysql -uroot -p${root_mysql_pass} \
-            -e "GRANT ALL PRIVILEGES ON drupal.* TO drupal@localhost"            
-    fi    
+            -e "GRANT ALL PRIVILEGES ON drupal.* TO drupal@localhost"
+    fi
 }
 
 add_sql_debian(){
@@ -530,27 +530,27 @@ EOM
 
 update_pwd_file(){
     rm -f ${DBPASSPATH}
-    if [ "${BANNERNAME}" = 'wordpress' ]; then    
+    if [ "${BANNERNAME}" = 'wordpress' ]; then
         cat >> ${DBPASSPATH} <<EOM
 root_mysql_pass="${root_mysql_pass}"
 wordpress_mysql_pass="${app_mysql_pass}"
 EOM
-    elif [ "${BANNERNAME}" = 'classicpress' ]; then 
-        cat >> ${DBPASSPATH} <<EOM 
+    elif [ "${BANNERNAME}" = 'classicpress' ]; then
+        cat >> ${DBPASSPATH} <<EOM
 root_mysql_pass="${root_mysql_pass}"
 classicpress_mysql_pass="${app_mysql_pass}"
 EOM
-    elif [ "${BANNERNAME}" = 'joomla' ]; then 
-        cat >> ${DBPASSPATH} <<EOM 
+    elif [ "${BANNERNAME}" = 'joomla' ]; then
+        cat >> ${DBPASSPATH} <<EOM
 root_mysql_pass="${root_mysql_pass}"
 joomla_mysql_pass="${app_mysql_pass}"
 EOM
-    elif [ "${BANNERNAME}" = 'drupal' ]; then 
-        cat >> ${DBPASSPATH} <<EOM 
+    elif [ "${BANNERNAME}" = 'drupal' ]; then
+        cat >> ${DBPASSPATH} <<EOM
 root_mysql_pass="${root_mysql_pass}"
 drupal_mysql_pass="${app_mysql_pass}"
 EOM
-    fi    
+    fi
 }
 
 upgrade_cyberpanel() {
@@ -614,13 +614,13 @@ update_conntrack_max(){
             sysctl -w net.netfilter.nf_conntrack_max=2097152 >/dev/null
             echo "net.netfilter.nf_conntrack_max=2097152" >> /etc/sysctl.conf
         fi
-    fi    
+    fi
 }
 
 add_profile(){
     if [ ${EDITION} != 'litespeed' ]; then
         echo "sudo /opt/domainsetup.sh" >> /etc/profile
-    fi    
+    fi
 }
 
 add_hosts(){
@@ -631,11 +631,11 @@ add_hosts(){
 }
 
 lsws_license(){
-    if [ ${EDITION} = 'litespeed' ]; then 
+    if [ ${EDITION} = 'litespeed' ]; then
         cd ${LSDIR}/conf
         wget -q --no-check-certificate http://license.litespeedtech.com/reseller/trial.key
         systemctl start lsws
-    fi    
+    fi
 }
 
 install_rainloop(){
@@ -693,7 +693,7 @@ install_firewalld(){
         ${FWDCMD}='rule family="ipv6" port protocol="tcp" port="40110-40210" accept'
 
         /usr/bin/firewall-cmd --reload
-    fi    
+    fi
 }
 
 check_version() {
@@ -730,7 +730,7 @@ check_version() {
 }
 
 update_phpmyadmin() {
-    INSTALL_PATH="${PHPMYPATH}" 
+    INSTALL_PATH="${PHPMYPATH}"
     LOCAL_VERSION=$(cat ${INSTALL_PATH}/ChangeLog | head -n4 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]')
     LATEST_VERSION=$(curl -s https://www.phpmyadmin.net/home_page/version.php | head -n1)
     URL="https://files.phpmyadmin.net/phpMyAdmin/${LATEST_VERSION}/phpMyAdmin-${LATEST_VERSION}-all-languages.zip"
@@ -749,10 +749,10 @@ update_phpmyadmin() {
         elif [ -f /etc/redhat-release ]; then
             USER='nobody'
             GROUP='nobody'
-        else    
+        else
             USER='www-data'
-            GROUP='www-data'     
-        fi 
+            GROUP='www-data'
+        fi
         chown -R ${USER}:${GROUP} ${INSTALL_PATH}/
         sudo rm -rf /tmp/phpMyAdmin-${LATEST_VERSION}-all-languages*
     fi
@@ -771,7 +771,7 @@ main_cyber()
     install_rainloop
     filepermission_update
     renew_blowfish
-    install_firewalld      
+    install_firewalld
 }
 
 main_cms()
@@ -787,7 +787,7 @@ main_cms()
         update_pwd_file
         update_phpmyadmin
         renew_blowfish
-        setup_after_ssh_drupal            
+        setup_after_ssh_drupal
     else
         renew_wp_pwd
         update_pwd_file
@@ -795,7 +795,7 @@ main_cms()
         update_phpmyadmin
         renew_blowfish
         setup_after_ssh
-    fi  
+    fi
 }
 
 maincloud(){
@@ -822,7 +822,7 @@ maincloud(){
     elif [ "${APPLICATION}" = 'PYTHON' ]; then
         update_secretkey
     elif [ "${APPLICATION}" = 'CMS' ]; then
-        main_cms   
+        main_cms
     fi
 }
 

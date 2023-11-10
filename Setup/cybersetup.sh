@@ -21,22 +21,22 @@ echoR()
 
 providerck()
 {
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s bios-vendor)" = 'Vultr' ];then
-        PROVIDER='vultr'             
+        PROVIDER='vultr'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
         PROVIDER='aliyun'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
         PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'        
+        PROVIDER='oracle'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 
@@ -64,15 +64,15 @@ check_os()
         OSVER=$(cat /etc/redhat-release | awk '{print substr($4,1,1)}')
         OSNAME=centos
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu    
+        OSNAME=ubuntu
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 
 upgrade() {
     echoG 'Updating system'
-    if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then 
+    if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then
         apt-get update > /dev/null 2>&1
         echo -ne '#####                     (33%)\r'
         DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' upgrade > /dev/null 2>&1
@@ -86,14 +86,14 @@ upgrade() {
         echo -ne '#                         (5%)\r'
         yum update -y > /dev/null 2>&1
         echo -ne '#######################   (100%)\r'
-    fi  
-    echoG 'Finish Update'  
+    fi
+    echoG 'Finish Update'
 }
 
 install_basic_pkg(){
-    if [ "${OSNAME}" = 'centos' ]; then 
+    if [ "${OSNAME}" = 'centos' ]; then
         yum -y install wget > /dev/null 2>&1
-    else  
+    else
         apt-get -y install wget > /dev/null 2>&1
     fi
 }
@@ -101,13 +101,13 @@ install_basic_pkg(){
 install_cyberpanel(){
     echoG 'Installing CyberPanel'
     ### The 1 1 will auto answer the prompt to install CyberPanel and OpenLiteSpeed
-    ### and then accept the default values for the rest of the questions.     
+    ### and then accept the default values for the rest of the questions.
     cd /opt/; wget -q https://cyberpanel.net/install.sh
     chmod +x install.sh
     printf "%s\n" 1 1 | bash install.sh
     echoG 'Finish CyberPanel'
     rm -rf cyberpanel cyberpanel.sh install.sh requirements.txt
-}   
+}
 
 rm_agpl_pkg(){
     local RAINLOOP_PATH='/usr/local/CyberCP/public/rainloop'
@@ -122,9 +122,9 @@ rm_agpl_pkg(){
 }
 
 special_fstab(){
-    if [ "${PROVIDER}" = 'vultr' ]; then 
+    if [ "${PROVIDER}" = 'vultr' ]; then
         sed -ie '/tmp/ s/^#*/#/' /etc/fstab
-    fi    
+    fi
 }
 
 rmdummy(){
@@ -132,7 +132,7 @@ rmdummy(){
     rm -rf ${NOWPATH}/install*
     rm -rf /usr/local/CyberCP/.idea/
     rm -f /etc/profile.d/cyberpanel.sh
-}    
+}
 
 main(){
     START_TIME="$(date -u +%s)"
@@ -152,4 +152,3 @@ main(){
 
 main
 exit 0
-

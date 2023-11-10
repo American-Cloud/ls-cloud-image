@@ -12,29 +12,29 @@ check_os(){
         OSNAME=centos
         BANNERDST='/etc/profile.d/99-one-click.sh'
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu   
+        OSNAME=ubuntu
         BANNERDST='/etc/update-motd.d/99-one-click'
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
         BANNERDST='/etc/update-motd.d/99-one-click'
-    fi        
+    fi
 }
 
 
 check_provider()
 {
     if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
-        PROVIDER='aws'    
+        PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'     
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
         PROVIDER='ali'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-        PROVIDER='azure'   
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+        PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'               
+        PROVIDER='oracle'
     elif [ -e /root/StackScript ]; then
         if grep -q 'linode' /root/StackScript; then
             PROVIDER='linode'
@@ -52,17 +52,17 @@ os_home_path()
         PUBIP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
     elif [ ${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
-        PUBIP=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)   
+        PUBIP=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
     elif [ ${PROVIDER} = 'ali' ]; then
         HMPATH='/root'
-        PUBIP=$(curl http://100.100.100.200/latest/meta-data/eipv4)   
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
+        PUBIP=$(curl http://100.100.100.200/latest/meta-data/eipv4)
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
         HMPATH='/root'
-        PUBIP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")        
+        PUBIP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")
     else
         HMPATH='/root'
         PUBIP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")
-    fi   
+    fi
 }
 
 
@@ -75,10 +75,10 @@ ct_version()
 setup_banner(){
     if [ ! -e ${BANNERDST} ]; then
         STATUS="$(curl -s https://raw.githubusercontent.com/litespeedtech/ls-cloud-image/master/Banner/${BANNERNAME} \
-        -o ${BANNERDST} -w "%{http_code}")"  
+        -o ${BANNERDST} -w "%{http_code}")"
         if [ ${?} != 0 ] || [ "${STATUS}" != '200' ]; then
             curl -s https://cloud.litespeed.sh/Banner/${BANNERNAME} -o ${BANNERDST}
-        fi  
+        fi
         chmod +x ${BANNERDST}
     fi
 }
@@ -124,7 +124,7 @@ csrconf
     rm -f ${SSL_HOSTNAME}.csr
     rm -f privkey.pem
     mv ${SSL_HOSTNAME}.crt ${LSDIR}/conf/${SSL_HOSTNAME}.crt
-    mv ${SSL_HOSTNAME}.key ${LSDIR}/conf/${SSL_HOSTNAME}.key      
+    mv ${SSL_HOSTNAME}.key ${LSDIR}/conf/${SSL_HOSTNAME}.key
 }
 
 
@@ -148,7 +148,7 @@ rm_dummy(){
         fi
         if [ "${PROVIDER}" = 'ali' ]; then
             mv /etc/motd /etc/motd.bk
-        fi      
+        fi
     fi
 }
 
@@ -162,10 +162,10 @@ add_hosts(){
 
 
 setupLicense(){
-  if [[ -e '/usr/local/lsws/conf/trial.key' ]]; then    
-      rm -rf /usr/local/lsws/conf/trial.key  
-  fi  
-  curl http://license.litespeedtech.com/reseller/trial.key > /usr/local/lsws/conf/trial.key  
+  if [[ -e '/usr/local/lsws/conf/trial.key' ]]; then
+      rm -rf /usr/local/lsws/conf/trial.key
+  fi
+  curl http://license.litespeedtech.com/reseller/trial.key > /usr/local/lsws/conf/trial.key
   ${LSDIR}/bin/lshttpd -r
   /usr/bin/systemctl restart lsws
 }

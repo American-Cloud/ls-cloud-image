@@ -74,18 +74,18 @@ show_help() {
         echo "${EPACE}${EPACE}Above example will create a virtual host with www.example.com and example.com domain"
         echo "${EPACE}${EPACE}Issue and install Let's encrypt certificate and Wordpress with LiteSpeed Cache plugin."
         echow "-C, --classicpress"
-        echo "${EPACE}${EPACE}This will install a ClassicPress with LiteSpeed Cache plugin." 
-        echow "--create-db-only" 
-        echo "${EPACE}${EPACE}To install OpenLiteSpeed and MySQL"          
-        echow "--dbname [DATABASENAME]" 
+        echo "${EPACE}${EPACE}This will install a ClassicPress with LiteSpeed Cache plugin."
+        echow "--create-db-only"
+        echo "${EPACE}${EPACE}To install OpenLiteSpeed and MySQL"
+        echow "--dbname [DATABASENAME]"
         echo "${EPACE}${EPACE}To set the database name to be used by WordPress."
-        echow "--dbuser [DBUSERNAME]" 
+        echow "--dbuser [DBUSERNAME]"
         echo "${EPACE}${EPACE}To set the WordPress username in the database."
-        echow "--dbpassword [PASSWORD]" 
-        echo "${EPACE}${EPACE}To set the WordPress table password in MySQL instead of using a random one."        
+        echow "--dbpassword [PASSWORD]"
+        echo "${EPACE}${EPACE}To set the WordPress table password in MySQL instead of using a random one."
         echow "--path, --document-path [CUSTOM_PATH]"
-        echo "${EPACE}${EPACE}This is to specify a location for the document root."  
-        echo "${EPACE}${EPACE}Example: ./vhsetup.sh --path /var/www/html"        
+        echo "${EPACE}${EPACE}This is to specify a location for the document root."
+        echo "${EPACE}${EPACE}Example: ./vhsetup.sh --path /var/www/html"
         echow "-BK, --backup"
         echo "${EPACE}${EPACE}This will backup the lsws server config before changing anything, vhost config is not included."
         echow "--delete [DOMAIN_NAME]"
@@ -93,16 +93,16 @@ show_help() {
         echow '-H, --help'
         echo "${EPACE}${EPACE}Display help and exit."
         exit 0
-    ;;    
+    ;;
     "2")
-        echoY "If you need to install cert manually later, please check:" 
+        echoY "If you need to install cert manually later, please check:"
         echoB "https://docs.litespeedtech.com/shared/cloud/OPT-LETSHTTPS/"
         echo ''
-    ;;  
+    ;;
     "3")
         echo "Please make sure you have ${HM_PATH}/.db_password file with content:"
         echoY 'root_mysql_pass="YOUR_DB_PASSWORD"'
-    ;;  
+    ;;
     esac
 }
 
@@ -112,7 +112,7 @@ function check_os
         OSNAME=centos
         USER='nobody'
         GROUP='nobody'
-        case $(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1) in 
+        case $(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1) in
         6)
             OSNAMEVER=CENTOS6
             OSVER=6
@@ -128,13 +128,13 @@ function check_os
         9)
             OSNAMEVER=CENTOS9
             OSVER=9
-            ;;            
+            ;;
         esac
     elif [ -f /etc/redhat-release ] ; then
         OSNAME=centos
         USER='nobody'
         GROUP='nobody'
-        case $(cat /etc/redhat-release | tr -dc '0-9.'|cut -d \. -f1) in 
+        case $(cat /etc/redhat-release | tr -dc '0-9.'|cut -d \. -f1) in
         6)
             OSNAMEVER=CENTOS6
             OSVER=6
@@ -150,8 +150,8 @@ function check_os
         9)
             OSNAMEVER=CENTOS9
             OSVER=9
-            ;;            
-        esac             
+            ;;
+        esac
     elif [ -f /etc/lsb-release ] ; then
         OSNAME=ubuntu
         case $(cat /etc/os-release | grep UBUNTU_CODENAME | cut -d = -f 2) in
@@ -159,7 +159,7 @@ function check_os
             OSNAMEVER=UBUNTU14
             OSVER=trusty
             MARIADBCPUARCH="arch=amd64,i386,ppc64el"
-            ;;        
+            ;;
         xenial)
             OSNAMEVER=UBUNTU16
             OSVER=xenial
@@ -170,16 +170,16 @@ function check_os
             OSVER=bionic
             MARIADBCPUARCH="arch=amd64"
             ;;
-        focal)            
+        focal)
             OSNAMEVER=UBUNTU20
             OSVER=focal
             MARIADBCPUARCH="arch=amd64"
             ;;
-        jammy)            
+        jammy)
             OSNAMEVER=UBUNTU22
             OSVER=jammy
             MARIADBCPUARCH="arch=amd64"
-            ;;            
+            ;;
         esac
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
@@ -189,7 +189,7 @@ function check_os
             OSVER=jessie
             MARIADBCPUARCH="arch=amd64,i386"
             ;;
-        stretch) 
+        stretch)
             OSNAMEVER=DEBIAN9
             OSVER=stretch
             MARIADBCPUARCH="arch=amd64,i386"
@@ -204,7 +204,7 @@ function check_os
             OSVER=bullseye
             MARIADBCPUARCH="arch=amd64,i386"
             ;;
-        esac    
+        esac
     fi
 
     if [ "$OSNAMEVER" = '' ] ; then
@@ -220,37 +220,37 @@ function check_os
             echoG "Current platform is $OSNAMEVER $OSNAME $OSVER."
         fi
     fi
-}    
+}
 
 check_provider()
 {
-    if [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
         PROVIDER='google'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='aliyun'  
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-        PROVIDER='azure'    
+        PROVIDER='aliyun'
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+        PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'             
+        PROVIDER='oracle'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 check_home_path()
 {
-    if [ ${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then 
+    if [ ${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then
         HM_PATH='/home/ubuntu'
-    elif [ ${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then 
-        HM_PATH='/home/ubuntu'  
+    elif [ ${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then
+        HM_PATH='/home/ubuntu'
     elif [ ${PROVIDER} = 'aliyun' ] && [ -d /home/ubuntu ]; then
         HM_PATH='/home/ubuntu'
     elif [ ${PROVIDER} = 'oracle' ] && [ -d /home/ubuntu ]; then
-        HM_PATH='/home/ubuntu'        
+        HM_PATH='/home/ubuntu'
     else
         HM_PATH='/root'
-    fi    
+    fi
 }
 check_root(){
     if [ $(id -u) -ne 0 ]; then
@@ -276,18 +276,18 @@ check_webserver(){
             VH_CONF_FILE="${VHDIR}/${MY_DOMAIN}/vhconf.conf"
         else
             echoR "${WEBCF} does not exist, exit!"
-            exit 1  
+            exit 1
         fi
-    else 
+    else
         if [ -e "${LSDIR}/conf/httpd_config.xml" ]; then
             WEBSERVER='LSWS'
             WEBCF="${LSDIR}/conf/httpd_config.xml"
             VH_CONF_FILE="${VHDIR}/${MY_DOMAIN}/vhconf.xml"
-        else 
+        else
             echoR 'No web serevr detect, exit!'
             exit 2
         fi
-    fi    
+    fi
 }
 
 fst_match_line(){
@@ -335,38 +335,38 @@ change_owner() {
 }
 line_insert(){
     LINENUM=$(grep -n "${1}" ${2} | cut -d: -f 1)
-    ADDNUM=${4:-0} 
+    ADDNUM=${4:-0}
     if [ -n "$LINENUM" ] && [ "$LINENUM" -eq "$LINENUM" ] 2>/dev/null; then
         LINENUM=$((${LINENUM}+${4}))
         sed -i "${LINENUM}i${3}" ${2}
-    fi  
+    fi
 }
 install_wp_cli() {
     if [ ! -e /usr/local/bin/wp ]; then
         curl -sO https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
         chmod +x wp-cli.phar
         mv wp-cli.phar /usr/local/bin/wp
-    fi    
+    fi
     if [ ! -f /usr/bin/php ]; then
         if [ -e ${LSDIR}/${PHPVER}/bin/php ]; then
             ln -s ${LSDIR}/${PHPVER}/bin/php /usr/bin/php
         else
             echoR "${LSDIR}/${PHPVER}/bin/php not exist, please check your PHP version!"
-            exit 1 
-        fi        
-    fi      
+            exit 1
+        fi
+    fi
 }
-ubuntu_install_certbot(){       
+ubuntu_install_certbot(){
     apt-get update > /dev/null 2>&1
     apt-get -y install certbot > /dev/null 2>&1
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
-        fi    
-        echoG 'Install CertBot finished'    
-    else 
-        echoR 'Please check CertBot'    
-    fi    
+        fi
+        echoG 'Install CertBot finished'
+    else
+        echoR 'Please check CertBot'
+    fi
 }
 
 centos_install_certbot(){
@@ -379,51 +379,51 @@ centos_install_certbot(){
     else
         yum -y install certbot  > /dev/null 2>&1
     fi
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
         fi
         echoG 'Install CertBot finished'
-    else 
-        echoR 'Please check CertBot'    
-    fi    
-} 
+    else
+        echoR 'Please check CertBot'
+    fi
+}
 
 install_certbot(){
     if [ ! -e /usr/bin/certbot ] && [ ! -e /usr/local/bin/certbot ]; then
-        echoG "Install CertBot" 
+        echoG "Install CertBot"
         if [ ${OSNAME} = 'centos' ]; then
             centos_install_certbot
         else
-            ubuntu_install_certbot 
+            ubuntu_install_certbot
         fi
     fi
 }
 
 install_unzip(){
     if [ ! -e /usr/bin/unzip ]; then
-        echoG "Install unzip" 
+        echoG "Install unzip"
         if [ ${OSNAME} = 'centos' ]; then
             yum install unzip -y > /dev/null 2>&1
         else
             apt install unzip -y > /dev/null 2>&1
         fi
-    fi    
+    fi
 }
 
 gen_password(){
     if [ -e ${HM_PATH}/.db_password ]; then
         ROOT_PASS=$(cat ${HM_PATH}/.db_password | head -n 1 | awk -F '"' '{print $2}')
     fi
-    if [ "${DATABASENAME}" = '' ]; then 
+    if [ "${DATABASENAME}" = '' ]; then
         DATABASENAME=$(echo "${MY_DOMAIN}" | sed -e 's/\.//g; s/-//g')
     fi
-    if [ "${USERNAME}" = '' ]; then  
+    if [ "${USERNAME}" = '' ]; then
         USERNAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8; echo '')
     fi
-    if [ "${USERPASSWORD}" = '' ]; then 
+    if [ "${USERPASSWORD}" = '' ]; then
         USERPASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 48; echo '')
-    fi    
+    fi
 }
 
 check_which_cms(){
@@ -436,16 +436,16 @@ check_which_cms(){
                 if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
                     WORDPRESS='ON'
                 else
-                    WORDPRESS='OFF'    
+                    WORDPRESS='OFF'
                 fi
             fi
-            if [ "${WORDPRESS}" = 'OFF' ] && [ "${CLASSICPRESS}" = 'OFF' ]; then 
+            if [ "${WORDPRESS}" = 'OFF' ] && [ "${CLASSICPRESS}" = 'OFF' ]; then
                 printf "%s" "Install ClassicPress? [y/N]: "
                 read TMP_YN
                 if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
                     CLASSICPRESS='ON'
                 else
-                    CLASSICPRESS='OFF'    
+                    CLASSICPRESS='OFF'
                 fi
             fi
             if [ "${WORDPRESS}" = 'ON' ]; then
@@ -501,10 +501,10 @@ if (!is_plugin_active( \$path )) {
 END
         if [ ! -f ${THEME_PATH}/functions.php.bk ]; then
             cat >> "${THEME_PATH}/functions.php.bk" <<END
-<?php 
+<?php
 END
         fi
-    elif [ ! -f ${THEME_PATH}/functions.php.bk ]; then 
+    elif [ ! -f ${THEME_PATH}/functions.php.bk ]; then
         cp ${THEME_PATH}/functions.php ${THEME_PATH}/functions.php.bk
         cked
         ed ${THEME_PATH}/functions.php << END >>/dev/null 2>&1
@@ -548,17 +548,17 @@ create_db_user(){
             else
                 echoR "something went wrong when create new database, please proceed to manual installtion."
                 DB_TEST=1
-            fi            
+            fi
         else
-            echoR "No DataBase Password, skip!"  
+            echoR "No DataBase Password, skip!"
             DB_TEST=1
             show_help 3
-        fi    
+        fi
     else
-        echoR "No DataBase Password, skip!"  
+        echoR "No DataBase Password, skip!"
         DB_TEST=1
         show_help 3
-    fi    
+    fi
 }
 
 install_wp() {
@@ -573,7 +573,7 @@ install_wp() {
         get_theme_name
         config_wp
         change_owner
-        echoG "WP downloaded, please access your domain to complete the setup."    
+        echoG "WP downloaded, please access your domain to complete the setup."
     fi
 }
 
@@ -590,8 +590,8 @@ check_create_db(){
         if [ ${?} = 0 ]; then
             create_db_user
             save_db_user_pwd
-        fi    
-    fi    
+        fi
+    fi
 }
 
 set_wp_htaccess(){
@@ -618,7 +618,7 @@ config_wp() {
     echoG 'Finish WordPress'
 }
 
-check_install_wp() { 
+check_install_wp() {
     if [ "${DB_ONLY}" = 'OFF' ]; then
         if [ ${WORDPRESS} = 'ON' ]; then
             check_process 'mysqld\|mariadb'
@@ -626,11 +626,11 @@ check_install_wp() {
                 if [ ! -f ${DOCHM}/wp-config.php ]; then
                     install_wp
                 else
-                    echoR 'WordPress existed, skip!'    
-                fi    
+                    echoR 'WordPress existed, skip!'
+                fi
             else
                 echoR 'No MySQL environment, skip!'
-            fi                
+            fi
         fi
     fi
 }
@@ -649,8 +649,8 @@ install_cp() {
         get_theme_name
         config_cp
         change_owner
-        echoG "ClassicPress downloaded, please access your domain to complete the setup." 
-    fi    
+        echoG "ClassicPress downloaded, please access your domain to complete the setup."
+    fi
 }
 
 set_cp_htaccess(){
@@ -685,11 +685,11 @@ check_install_cp() {
                 if [ ! -f ${DOCHM}/wp-config.php ]; then
                     install_cp
                 else
-                    echoR "ClassicPress already exists at ${DOCHM}. Skip!"   
-                fi    
+                    echoR "ClassicPress already exists at ${DOCHM}. Skip!"
+                fi
             else
                 echoR 'No MySQL environment, skip!'
-            fi                
+            fi
         fi
     fi
 }
@@ -827,20 +827,20 @@ set_ols_server_conf() {
         NEWKEY="map                     ${MY_DOMAIN2} ${MY_DOMAIN}, ${MY_DOMAIN2}"
         local TEMP_DOMAIN=${MY_DOMAIN2}
     else
-        NEWKEY="map                     ${MY_DOMAIN} ${MY_DOMAIN}"    
+        NEWKEY="map                     ${MY_DOMAIN} ${MY_DOMAIN}"
         local TEMP_DOMAIN=${MY_DOMAIN}
     fi
     PORT_ARR=$(grep "address.*:[0-9]"  ${WEBCF} | awk '{print substr($2,3)}')
     if [  ${#PORT_ARR[@]} != 0 ]; then
-        for PORT in ${PORT_ARR[@]}; do 
+        for PORT in ${PORT_ARR[@]}; do
             line_insert ":${PORT}$"  ${WEBCF} "${NEWKEY}" 2
         done
     else
-        echoR 'No listener port detected, listener setup skip!'    
+        echoR 'No listener port detected, listener setup skip!'
     fi
     if [ "${CUSTOM_PATH}" = '' ]; then
         CUSTOM_PATH="${WWW_PATH}/${MY_DOMAIN}"
-    fi    
+    fi
     echo "
 virtualhost ${TEMP_DOMAIN} {
 vhRoot                  "${CUSTOM_PATH}"
@@ -855,7 +855,7 @@ update_ssl_vh_conf(){
     sed -i 's|localhost|'${EMAIL}'|g' ${VH_CONF_FILE}
     sed -i 's|'${LSDIR}'/conf/example.key|/etc/letsencrypt/live/'${MY_DOMAIN}'/privkey.pem|g' ${VH_CONF_FILE}
     sed -i 's|'${LSDIR}'/conf/example.crt|/etc/letsencrypt/live/'${MY_DOMAIN}'/fullchain.pem|g' ${VH_CONF_FILE}
-    echoG "\ncertificate has been successfully installed..."  
+    echoG "\ncertificate has been successfully installed..."
 }
 
 set_lsws_server_conf(){
@@ -881,7 +881,7 @@ set_lsws_server_conf(){
             sed -i "${LINENUM}i${NEWKEY}" ${WEBCF}
         done
     else
-        echoR 'No listener port detected, listener setup skip!'    
+        echoR 'No listener port detected, listener setup skip!'
     fi
 
     if [ "${CUSTOM_PATH}" = '' ]; then
@@ -909,7 +909,7 @@ main_set_vh(){
     else
         DOCHM="${CUSTOM_PATH}"
         create_folder ${CUSTOM_PATH}
-    fi    
+    fi
     if [ ${DOMAIN_SKIP} = 'OFF' ]; then
         if [ "${WEBSERVER}" = 'OLS' ]; then
             set_ols_vh_conf
@@ -917,10 +917,10 @@ main_set_vh(){
         elif [ "${WEBSERVER}" = 'LSWS' ]; then
             set_lsws_vh_conf
             set_lsws_server_conf
-        fi            
+        fi
         restart_lsws
         echoG "Vhost created success!"
-    fi    
+    fi
 }
 
 rm_ols_vh_conf(){
@@ -934,7 +934,7 @@ rm_ols_vh_conf(){
         echoG "Remove virtual host config: ${VHDIR}/www.${MY_DOMAIN}"
         rm -rf "${VHDIR}/www.${MY_DOMAIN}"
     else
-        echoR "${VH_CONF_FILE} does not exist, skip!" 
+        echoR "${VH_CONF_FILE} does not exist, skip!"
     fi
 }
 
@@ -949,7 +949,7 @@ rm_dm_ols_svr_conf(){
         sed -i "${FIRST_LINE_NUM},${LAST_LINE_NUM}d" ${WEBCF}
     else
         echoR "virtualhost ${1} does not found, if this is the default virtual host config, please remove it manually!"
-    fi    
+    fi
 }
 
 rm_lsws_vh_conf(){
@@ -963,12 +963,12 @@ rm_lsws_vh_conf(){
         echoG "Remove virtual host config: ${VHDIR}/www.${MY_DOMAIN}"
         rm -rf "${VHDIR}/www.${MY_DOMAIN}"
     else
-        echoR "${VH_CONF_FILE} does not exist, skip!" 
+        echoR "${VH_CONF_FILE} does not exist, skip!"
     fi
 }
 
 rm_dm_lsws_svr_conf(){
-    echoY 'Remove LSWS VirtualHost does not support yet!' 
+    echoY 'Remove LSWS VirtualHost does not support yet!'
 }
 
 rm_le_cert(){
@@ -982,26 +982,26 @@ rm_main_conf(){
     if [ "${WEBSERVER}" = 'OLS' ]; then
         grep -w "map.*[[:space:]]${MY_DOMAIN}" ${WEBCF} >/dev/null 2>&1
         if [ ${?} = 0 ]; then
-            echoG "Domain exist, continue deleting.."        
+            echoG "Domain exist, continue deleting.."
             rm_ols_vh_conf
             rm_dm_ols_svr_conf ${MY_DOMAIN2}
             restart_lsws
             echoG "Domain remove finished!"
-        else 
-            echoR "Domain does not exist, exit!"  
-            exit 1       
-        fi     
+        else
+            echoR "Domain does not exist, exit!"
+            exit 1
+        fi
     elif [ "${WEBSERVER}" = 'LSWS' ]; then
         grep -w "<vhost>${MY_DOMAIN}" ${WEBCF} >/dev/null 2>&1
         if [ ${?} = 0 ]; then
-            echoG "Domain exist, continue deleting.." 
+            echoG "Domain exist, continue deleting.."
             rm_lsws_vh_conf
             rm_dm_lsws_svr_conf ${MY_DOMAIN2}
             restart_lsws
             echoG "Domain remove finished!"
-        else 
-            echoR "Domain does not exist, exit!"  
-            exit 1       
+        else
+            echoR "Domain does not exist, exit!"
+            exit 1
         fi
     fi
 
@@ -1036,13 +1036,13 @@ input_email() {
             read TMP_YN
             if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
                 break
-            fi    
+            fi
 	    done
     fi
     if [[ ! ${EMAIL} =~ ${CKREG} ]]; then
     	echoR "\nPlease enter a valid E-mail, skip!\n"
         EMAIL_SKIP='ON'
-    fi	
+    fi
 }
 apply_lecert() {
     if [ ${WWW} = 'TRUE' ]; then
@@ -1051,7 +1051,7 @@ apply_lecert() {
         certbot certonly --non-interactive --agree-tos -m ${EMAIL} --webroot -w ${DOCHM} -d ${MY_DOMAIN}
     fi
     if [ ${?} -eq 0 ]; then
-        update_ssl_vh_conf    
+        update_ssl_vh_conf
     else
         echoR "Oops, something went wrong..."
         exit 1
@@ -1060,7 +1060,7 @@ apply_lecert() {
 
 certbothook() {
     grep 'certbot.*restart lsws' ${BOTCRON} >/dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'Web Server Restart hook already set!'
     else
         if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ] ; then
@@ -1075,11 +1075,11 @@ certbothook() {
             else
                 echoY 'Please check certbot crontab'
             fi
-        fi    
+        fi
         grep 'restart lsws' ${BOTCRON} > /dev/null 2>&1
-        if [ ${?} = 0 ]; then 
+        if [ ${?} = 0 ]; then
             echoG 'Certbot hook update success'
-        else 
+        else
             echoY 'Please check certbot crond'
         fi
     fi
@@ -1091,11 +1091,11 @@ force_https() {
         read TMP_YN
         if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
             FORCE_HTTPS='ON'
-        fi  
-    fi    
+        fi
+    fi
     if [ ${FORCE_HTTPS} = 'ON' ]; then
         create_file "${DOCHM}/.htaccess"
-        check_duplicate 'https://' "${DOCHM}/.htaccess"   
+        check_duplicate 'https://' "${DOCHM}/.htaccess"
         if [ ${?} = 1 ]; then
             echo "$(echo '
 ### Forcing HTTPS rule start
@@ -1105,11 +1105,11 @@ RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 ### Forcing HTTPS rule end
             ' | cat - ${DOCHM}/.htaccess)" >${DOCHM}/.htaccess
             restart_lsws
-            echoG "Force HTTPS rules added success!" 
+            echoG "Force HTTPS rules added success!"
         else
             echoR "Force HTTPS rules already existed, skip!"
         fi
-    fi 
+    fi
 }
 check_empty(){
     if [ -z "${1}" ]; then
@@ -1148,7 +1148,7 @@ domain_input(){
             read TMP_YN
             if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
                 break
-            fi    
+            fi
         done
     fi
     check_empty ${MY_DOMAIN}
@@ -1165,8 +1165,8 @@ issue_cert(){
         read TMP_YN
         if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
             ISSUECERT='ON'
-        fi  
-    fi    
+        fi
+    fi
     if [ ${ISSUECERT} = 'ON' ]; then
         verify_domain
         if [ ${DOMAIN_PASS} = 'ON' ]; then
@@ -1176,10 +1176,10 @@ issue_cert(){
                 apply_lecert
                 certbothook
                 restart_lsws
-            fi    
+            fi
         else
-            show_help 2   
-        fi    
+            show_help 2
+        fi
     fi
 }
 
@@ -1207,7 +1207,7 @@ check_value_follow(){
 
 end_msg(){
     echoG 'Setup finished!'
-}    
+}
 
 main() {
     check_root
@@ -1217,7 +1217,7 @@ main() {
     check_php_version
     domain_input
     check_webserver
-    server_conf_bk    
+    server_conf_bk
     main_set_vh ${MY_DOMAIN}
     issue_cert
     install_unzip
@@ -1250,7 +1250,7 @@ while [ ! -z "${1}" ]; do
                 ;;
         -le | -LE | --letsencrypt) shift
             if [ "${1}" = '' ] || [[ ! ${1} =~ ${CKREG} ]]; then
-                echoR "\nPlease enter a valid E-mail, exit!\n"   
+                echoR "\nPlease enter a valid E-mail, exit!\n"
                 exit 1
             else
                 ISSUECERT='ON'
@@ -1262,7 +1262,7 @@ while [ ! -z "${1}" ]; do
                 ;;
         -BK | --backup)
             BACKUP='ON'
-                ;;    
+                ;;
         -[hH] | --help)
             show_help 1
                 ;;
@@ -1275,21 +1275,21 @@ while [ ! -z "${1}" ]; do
         --create-db-only)
             DB_ONLY='ON'
                 ;;
-        --dbname )         
+        --dbname )
                 check_value_follow "$2" "database name"
                 shift
                 DATABASENAME=$FOLLOWPARAM
                 ;;
-        --dbuser )         
+        --dbuser )
                 check_value_follow "$2" "database username"
                 shift
                 USERNAME=$FOLLOWPARAM
                 ;;
-        --dbpassword )     
+        --dbpassword )
                 check_value_follow "$2" ""
                 if [ ! -z "$FOLLOWPARAM" ] ; then shift; fi
                 USERPASSWORD=$FOLLOWPARAM
-                ;;                    
+                ;;
         --path | --document-path) shift
             if [ "${1}" = '' ]; then
                 show_help 1
@@ -1306,7 +1306,7 @@ while [ ! -z "${1}" ]; do
                 main_delete "${MY_DOMAIN}"
                 exit 0
             fi
-                ;;             
+                ;;
         *)
             echoR "unknown argument..."
             show_help 1

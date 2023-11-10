@@ -44,7 +44,7 @@ linechange(){
     if [ -n "$LINENUM" ] && [ "$LINENUM" -eq "$LINENUM" ] 2>/dev/null; then
         sed -i "${LINENUM}d" ${2}
         sed -i "${LINENUM}i${3}" ${2}
-    fi  
+    fi
 }
 
 cked()
@@ -53,12 +53,12 @@ cked()
         echoG "ed exist"
     else
         echoG "no ed, ready to install"
-        if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then  
+        if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then
             apt-get install ed -y > /dev/null 2>&1
-        elif [ "${OSNAME}" = 'centos' ]; then    
+        elif [ "${OSNAME}" = 'centos' ]; then
             yum install ed -y > /dev/null 2>&1
-        fi    
-    fi    
+        fi
+    fi
 }
 
 get_sql_ver(){
@@ -67,14 +67,14 @@ get_sql_ver(){
     SQL_SECV=$(echo ${SQLDBVER} | awk -F '.' '{print $2}')
 }
 
-check_sql_ver(){    
+check_sql_ver(){
     if (( ${SQL_MAINV} >=11 && ${SQL_MAINV}<=99 )); then
         echoG '[OK] Mariadb version -ge 11'
     elif (( ${SQL_MAINV} >=10 )) && (( ${SQL_SECV} >=3 )); then
         echoG '[OK] Mariadb version -ge 10.3'
     else
-        echoR "Mariadb version ${SQLDBVER} is lower than 10.3, please check!"    
-    fi     
+        echoR "Mariadb version ${SQLDBVER} is lower than 10.3, please check!"
+    fi
 }
 
 
@@ -95,7 +95,7 @@ check_os()
         OSNAMEVER="UBUNTU$(lsb_release -sr | awk -F '.' '{print $1}')"
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 
 providerck()
@@ -103,35 +103,35 @@ providerck()
     if  [ ${OSNAME} = 'centos' ] && [ ! -e /usr/sbin/dmidecode ]; then
         yum install -y dmidecode > /dev/null 2>&1
     fi
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s bios-vendor)" = 'Vultr' ];then
-        PROVIDER='vultr'        
+        PROVIDER='vultr'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
         PROVIDER='aliyun'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
         PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
         PROVIDER='oracle'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 
 oshmpath()
 {
-    if [ ${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then 
+    if [ ${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
-    elif [ ${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then 
+    elif [ ${PROVIDER} = 'google' ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
     elif [ ${PROVIDER} = 'aliyun' ] && [ -d /home/ubuntu ]; then
         HMPATH='/home/ubuntu'
     elif [ ${PROVIDER} = 'oracle' ] && [ -d /home/ubuntu ]; then
-        HMPATH='/home/ubuntu'        
+        HMPATH='/home/ubuntu'
     else
         HMPATH='/root'
     fi
@@ -149,7 +149,7 @@ prepare(){
 
 system_upgrade() {
     echoG 'Updating system'
-    if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then 
+    if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ]; then
         apt-get update > /dev/null 2>&1
         echo -ne '#####                     (33%)\r'
         DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' upgrade > /dev/null 2>&1
@@ -163,17 +163,17 @@ system_upgrade() {
         echo -ne '#                         (5%)\r'
         yum update -y > /dev/null 2>&1
         echo -ne '#######################   (100%)\r'
-    fi    
+    fi
 }
 
 wp_conf_path(){
-    if [ -f "${LSWSCONF}" ]; then 
-        if [ ! -f $(grep 'configFile.*wordpress' "${LSWSCONF}" | awk '{print $2}') ]; then 
+    if [ -f "${LSWSCONF}" ]; then
+        if [ ! -f $(grep 'configFile.*wordpress' "${LSWSCONF}" | awk '{print $2}') ]; then
             WPVHCONF="${EXAMPLECONF}"
         fi
     else
         echo 'Can not find LSWS Config, exit script'
-        exit 1    
+        exit 1
     fi
 }
 
@@ -227,7 +227,7 @@ centos_install_redis(){
 }
 
 centos_install_certbot(){
-    echoG "Install CertBot" 
+    echoG "Install CertBot"
     if [ ${OSVER} = 8 ]; then
         wget -q https://dl.eff.org/certbot-auto
         mv certbot-auto /usr/local/bin/certbot
@@ -237,15 +237,15 @@ centos_install_certbot(){
     else
         yum -y install certbot  > /dev/null 2>&1
     fi
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
         fi
         echoG 'Install CertBot finished'
-    else 
-        echoR 'Please check CertBot'    
-    fi    
-} 
+    else
+        echoR 'Please check CertBot'
+    fi
+}
 
 ubuntu_install_basic(){
     apt-get -y install wget unzip > /dev/null 2>&1
@@ -259,36 +259,36 @@ ubuntu_install_memcached(){
     echoG 'Install Memcached'
     apt-get -y install memcached > /dev/null 2>&1
     systemctl start memcached > /dev/null 2>&1
-    systemctl enable memcached > /dev/null 2>&1        
+    systemctl enable memcached > /dev/null 2>&1
 }
 
-ubuntu_install_redis(){    
+ubuntu_install_redis(){
     echoG 'Install Redis'
     apt-get -y install redis > /dev/null 2>&1
     systemctl start redis > /dev/null 2>&1
 }
 
-ubuntu_install_certbot(){       
-    echoG "Install CertBot" 
+ubuntu_install_certbot(){
+    echoG "Install CertBot"
     if [ "${OSNAMEVER}" = 'UBUNTU18' ]; then
         add-apt-repository universe > /dev/null 2>&1
         echo -ne '\n' | add-apt-repository ppa:certbot/certbot > /dev/null 2>&1
-    fi    
+    fi
     apt-get update > /dev/null 2>&1
     apt-get -y install certbot > /dev/null 2>&1
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
-        fi    
-        echoG 'Install CertBot finished'    
-    else 
-        echoR 'Please check CertBot'    
-    fi    
+        fi
+        echoG 'Install CertBot finished'
+    else
+        echoR 'Please check CertBot'
+    fi
 }
 
 install_phpmyadmin(){
-    if [ ! -f ${PHPCONF}/changelog.php ]; then 
-        cd /tmp/ 
+    if [ ! -f ${PHPCONF}/changelog.php ]; then
+        cd /tmp/
         echoG 'Download phpmyadmin'
         wget -q https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
         unzip phpMyAdmin-latest-all-languages.zip > /dev/null 2>&1
@@ -298,12 +298,12 @@ install_phpmyadmin(){
         mv ${PHPCONF}/config.sample.inc.php ${PHPCONF}/config.inc.php
     fi
     change_owner ${PHPCONF}
-}  
+}
 
 install_wp_cli(){
-    if [ -e /usr/local/bin/wp ]; then 
+    if [ -e /usr/local/bin/wp ]; then
         echoG 'WP CLI already exist'
-    else    
+    else
         echoG "Install wp_cli"
         curl -sO https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
         chmod +x wp-cli.phar
@@ -316,12 +316,12 @@ install_wp_cli(){
 
 centos_config_ols(){
     echoG 'Setting Web Server config'
-    yum -y install --reinstall openlitespeed > /dev/null 2>&1   
+    yum -y install --reinstall openlitespeed > /dev/null 2>&1
     NEWKEY='  vhRoot                  /var/www/html'
     linechange 'www/html' ${LSWSCONF} "${NEWKEY}"
     sed -i '/errorlog logs\/error.log/a \ \ \ \ \ \ \ \ keepDays             1' ${LSWSCONF}
     sed -i 's/maxStaleAge         200/maxStaleAge         0/g' ${LSWSCONF}
-    cat > ${WPVHCONF} <<END 
+    cat > ${WPVHCONF} <<END
 docRoot                   ${DOCLAND}/
 
 index  {
@@ -368,7 +368,7 @@ ubuntu_config_ols(){
     linechange 'www/html' ${LSWSCONF} "${NEWKEY}"
     sed -i '/errorlog logs\/error.log/a \ \ \ \ \ \ \ \ keepDays             1' ${LSWSCONF}
     sed -i 's/maxStaleAge         200/maxStaleAge         0/g' ${LSWSCONF}
-    cat > ${WPVHCONF} <<END 
+    cat > ${WPVHCONF} <<END
 docRoot                   ${DOCLAND}/
 
 index  {
@@ -410,30 +410,30 @@ landing_pg(){
     echoG 'Setting Landing Page'
     curl -s https://raw.githubusercontent.com/litespeedtech/ls-cloud-image/master/Static/wp-landing.html \
     -o ${DOCLAND}/index.html
-    if [ -e ${DOCLAND}/index.html ]; then 
+    if [ -e ${DOCLAND}/index.html ]; then
         echoG 'Landing Page finished'
     else
         echoR "Please check Landing Page here ${DOCLAND}/index.html"
-    fi    
+    fi
 }
 
 update_final_permission(){
     change_owner ${DOCHM}
     change_owner /tmp/lshttpd/lsphp.sock*
-    rm -f /tmp/lshttpd/.rtreport 
+    rm -f /tmp/lshttpd/.rtreport
     rm -f /tmp/lshttpd/.status
 }
 
 ubuntu_config_memcached(){
    echoG 'Setting Object Cache'
     service memcached stop > /dev/null 2>&1
-    cat >> "${MEMCACHECONF}" <<END 
+    cat >> "${MEMCACHECONF}" <<END
 -s /var/www/memcached.sock
 -a 0770
 -p /tmp/memcached.pid
 END
     NEWKEY="-u ${USER}"
-    linechange '\-u memcache' ${MEMCACHECONF} "${NEWKEY}"  
+    linechange '\-u memcache' ${MEMCACHECONF} "${NEWKEY}"
     systemctl daemon-reload > /dev/null 2>&1
     service memcached start > /dev/null 2>&1
 }
@@ -441,8 +441,8 @@ END
 ubuntu_config_redis(){
     service redis-server stop > /dev/null 2>&1
     NEWKEY="Group=${GROUP}"
-    linechange 'Group=' ${REDISSERVICE} "${NEWKEY}" 
-    cat >> "${REDISCONF}" <<END 
+    linechange 'Group=' ${REDISSERVICE} "${NEWKEY}"
+    cat >> "${REDISCONF}" <<END
 unixsocket /var/run/redis/redis-server.sock
 unixsocketperm 775
 END
@@ -455,8 +455,8 @@ END
 
 centos_config_memcached(){
     echoG 'Setting Object Cache'
-    service memcached stop > /dev/null 2>&1 
-    cat >> "${MEMCACHESERVICE}" <<END 
+    service memcached stop > /dev/null 2>&1
+    cat >> "${MEMCACHESERVICE}" <<END
 [Unit]
 Description=Memcached
 Before=httpd.service
@@ -472,7 +472,7 @@ ExecStart=/usr/bin/memcached -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$O
 [Install]
 WantedBy=multi-user.target
 END
-        cat > "${MEMCACHECONF}" <<END 
+        cat > "${MEMCACHECONF}" <<END
 PORT="11211"
 USER="${USER}"
 MAXCONN="1024"
@@ -480,9 +480,9 @@ CACHESIZE="64"
 OPTIONS="-s /var/www/memcached.sock -a 0770 -U 0 -l 127.0.0.1"
 END
     ### SELINUX permissive Mode
-    if [ ! -f /usr/sbin/semanage ]; then 
+    if [ ! -f /usr/sbin/semanage ]; then
         yum install -y policycoreutils-python-utils > /dev/null 2>&1
-    fi    
+    fi
     semanage permissive -a memcached_t
     setsebool -P httpd_can_network_memcache 1
     systemctl daemon-reload > /dev/null
@@ -492,8 +492,8 @@ END
 centos_config_redis(){
     service redis stop > /dev/null 2>&1
     NEWKEY="Group=${GROUP}"
-    linechange 'Group=' ${REDISSERVICE} "${NEWKEY}"  
-    cat >> "${REDISCONF}" <<END 
+    linechange 'Group=' ${REDISSERVICE} "${NEWKEY}"
+    cat >> "${REDISCONF}" <<END
 unixsocket /var/run/redis/redis-server.sock
 unixsocketperm 775
 END
@@ -507,9 +507,9 @@ END
 config_mysql(){
     echoG 'Setting DataBase'
     get_sql_ver
-    if [ -f ${DBPASSPATH} ]; then 
-        EXISTSQLPASS=$(grep root_mysql_passs ${HMPATH}/.db_password | awk -F '"' '{print $2}'); 
-    fi    
+    if [ -f ${DBPASSPATH} ]; then
+        EXISTSQLPASS=$(grep root_mysql_passs ${HMPATH}/.db_password | awk -F '"' '{print $2}');
+    fi
     if [ "${EXISTSQLPASS}" = '' ]; then
         if (( ${SQL_MAINV} >=10 )) && (( ${SQL_SECV} >=4 )); then
             mysql -u root -p${root_mysql_pass} \
@@ -517,15 +517,15 @@ config_mysql(){
         else
             mysql -u root -p${root_mysql_pass} \
                 -e "update mysql.user set authentication_string=password('${root_mysql_pass}') where user='root';"
-        fi    
+        fi
     else
         if (( ${SQL_MAINV} >=10 )) && (( ${SQL_SECV} >=4)); then
             mysql -u root -p${EXISTSQLPASS} \
                 -e "ALTER USER root@localhost IDENTIFIED VIA mysql_native_password USING PASSWORD('${root_mysql_pass}');"
-        else        
-            mysql -u root -p${EXISTSQLPASS} \     
-                -e "update mysql.user set authentication_string=password('${root_mysql_pass}') where user='root';" 
-        fi        
+        else
+            mysql -u root -p${EXISTSQLPASS} \
+                -e "update mysql.user set authentication_string=password('${root_mysql_pass}') where user='root';"
+        fi
     fi
     #if [ -e ${MARIADBSERVICE} ]; then
     #    grep -i LogLevelMax ${MARIADBSERVICE} >/dev/null 2>&1
@@ -533,9 +533,9 @@ config_mysql(){
     #        echo 'LogLevelMax=1' >> ${MARIADBSERVICE}
     #    fi
     #fi
-    #if [ ! -e ${MARIADBCNF} ]; then 
+    #if [ ! -e ${MARIADBCNF} ]; then
     #touch ${MARIADBCNF}
-    #cat > ${MARIADBCNF} <<END 
+    #cat > ${MARIADBCNF} <<END
 #[mysqld]
 #sql_mode="NO_ENGINE_SUBSTITUTION,NO_AUTO_CREATE_USER"
 #END
@@ -560,9 +560,9 @@ install_wp_plugin(){
 }
 
 set_htaccess(){
-    if [ ! -f ${DOCHM}/.htaccess ]; then 
+    if [ ! -f ${DOCHM}/.htaccess ]; then
         touch ${DOCHM}/.htaccess
-    fi   
+    fi
     cat << EOM > ${DOCHM}/.htaccess
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
@@ -586,8 +586,8 @@ get_theme_name(){
     fi
 }
 
-set_lscache(){ 
-    cat << EOM > "${WPCONSTCONF}" 
+set_lscache(){
+    cat << EOM > "${WPCONSTCONF}"
 ;
 ; This is the predefined default LSCWP configuration file
 ;
@@ -894,14 +894,14 @@ optm-css_comb_ext_inl = true
 ; O_OPTM_UCSS
 optm-ucss = false
 
-; O_OPTM_UCSS_INLINE	
-optm-ucss_inline = false	
-; O_OPTM_UCSS_FILE_EXC_INLINE	
-optm-ucss_file_exc_inline = ''	
+; O_OPTM_UCSS_INLINE
+optm-ucss_inline = false
+; O_OPTM_UCSS_FILE_EXC_INLINE
+optm-ucss_file_exc_inline = ''
 ; O_OPTM_UCSS_SELECTOR_WHITELIST
 optm-ucss_whitelist = ''
 
-; O_OPTM_UCSS_EXC	
+; O_OPTM_UCSS_EXC
 optm-ucss_exc = ''
 
 optm-css_exc = ''
@@ -1009,19 +1009,19 @@ object-pswd = ''
 
 object-global_groups = 'users
 userlogins
-useremail	
-userslugs	
-usermeta	
-user_meta	
-site-transient	
-site-options	
-site-lookup	
-site-details	
-blog-lookup	
-blog-details	
-blog-id-cache	
-rss	
-global-posts	
+useremail
+userslugs
+usermeta
+user_meta
+site-transient
+site-options
+site-lookup
+site-details
+blog-lookup
+blog-details
+blog-id-cache
+rss
+global-posts
 global-cache-test'
 
 object-non_persistent_groups = 'comment
@@ -1044,11 +1044,11 @@ discuss-avatar_cron = false
 ; O_DISCUSS_AVATAR_CACHE_TTL
 discuss-avatar_cache_ttl = 604800
 
-; O_OPTM_LOCALIZE	
-optm-localize = false	
-; O_OPTM_LOCALIZE_DOMAINS	
-optm-localize_domains = '### Popular scripts ###	
-https://platform.twitter.com/widgets.js	
+; O_OPTM_LOCALIZE
+optm-localize = false
+; O_OPTM_LOCALIZE_DOMAINS
+optm-localize_domains = '### Popular scripts ###
+https://platform.twitter.com/widgets.js
 https://connect.facebook.net/en_US/fbevents.js'
 
 
@@ -1113,9 +1113,9 @@ media-lazy_uri_exc = ''
 ; O_MEDIA_LQIP_EXC
 media-lqip_exc = ''
 
-; O_MEDIA_VPI	
-media-vpi = false	
-; O_MEDIA_VPI_CRON	
+; O_MEDIA_VPI
+media-vpi = false
+; O_MEDIA_VPI_CRON
 media-vpi_cron = false
 
 
@@ -1139,16 +1139,16 @@ img_optm-lossless = false
 img_optm-exif = true
 
 
-img_optm-webp_attr = 'img.src	
-div.data-thumb	
-img.data-src	
-img.data-lazyload	
-div.data-large_image	
-img.retina_logo_url	
-div.data-parallax-image	
-div.data-vc-parallax-image	
-video.poster'	
-img_optm-webp_replace_srcset = false	
+img_optm-webp_attr = 'img.src
+div.data-thumb
+img.data-src
+img.data-lazyload
+div.data-large_image
+img.retina_logo_url
+div.data-parallax-image
+div.data-vc-parallax-image
+video.poster'
+img_optm-webp_replace_srcset = false
 img_optm-jpg_quality = 82
 
 
@@ -1296,7 +1296,7 @@ filetype[0] = '.aac
 .svg
 .ttf
 .webp
-.woff	
+.woff
 .woff2'
 
 ;;url[1] = 'https://2nd_CDN_url.com/'
@@ -1319,10 +1319,10 @@ if (!is_plugin_active( \$path )) {
 END
         if [ ! -f ${THEME_PATH}/functions.php.bk ]; then
             cat >> "${THEME_PATH}/functions.php.bk" <<END
-<?php 
+<?php
 END
         fi
-    elif [ ! -f ${THEME_PATH}/functions.php.bk ]; then 
+    elif [ ! -f ${THEME_PATH}/functions.php.bk ]; then
         cp ${THEME_PATH}/functions.php ${THEME_PATH}/functions.php.bk
         cked
         ed ${THEME_PATH}/functions.php << END >>/dev/null 2>&1
@@ -1338,14 +1338,14 @@ w
 q
 END
     fi
-}    
+}
 
 db_password_file(){
     echoG 'Create db fiile'
-    if [ -f ${DBPASSPATH} ]; then 
+    if [ -f ${DBPASSPATH} ]; then
         echoY "${DBPASSPATH} already exist!, will recreate a new file"
         rm -f ${DBPASSPATH}
-    fi    
+    fi
     touch "${DBPASSPATH}"
     cat >> "${DBPASSPATH}" <<EOM
 root_mysql_pass="${root_mysql_pass}"
@@ -1368,83 +1368,83 @@ oci_iptables(){
 ubuntu_firewall_add(){
     echoG 'Setting Firewall'
     #ufw status verbose | grep inactive > /dev/null 2>&1
-    #if [ ${?} = 0 ]; then 
+    #if [ ${?} = 0 ]; then
     for PORT in ${FIREWALLLIST}; do
         ufw allow ${PORT} > /dev/null 2>&1
-    done    
-    echo "y" | ufw enable > /dev/null 2>&1 
+    done
+    echo "y" | ufw enable > /dev/null 2>&1
     ufw status | grep '80.*ALLOW' > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'firewalld rules setup success'
-    else 
-        echoR 'Please check ufw rules'    
-    fi    
+    else
+        echoR 'Please check ufw rules'
+    fi
     #else
-    #    echoG "ufw already enabled"    
+    #    echoG "ufw already enabled"
     #fi
-    if [ ${PROVIDER} = 'oracle' ]; then 
+    if [ ${PROVIDER} = 'oracle' ]; then
         oci_iptables
     fi
 }
 
 centos_firewall_add(){
     echoG 'Setting Firewall'
-    if [ ! -e /usr/sbin/firewalld ]; then 
+    if [ ! -e /usr/sbin/firewalld ]; then
         yum -y install firewalld > /dev/null 2>&1
     fi
     service firewalld start  > /dev/null 2>&1
     systemctl enable firewalld > /dev/null 2>&1
-    for PORT in ${FIREWALLLIST}; do 
+    for PORT in ${FIREWALLLIST}; do
         firewall-cmd --permanent --add-port=${PORT}/tcp > /dev/null 2>&1
-    done 
+    done
     firewall-cmd --reload > /dev/null 2>&1
     firewall-cmd --list-all | grep 80 > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'firewalld rules setup success'
-    else 
-        echoR 'Please check firewalld rules'    
-    fi  
-    if [ ${PROVIDER} = 'oracle' ]; then 
+    else
+        echoR 'Please check firewalld rules'
+    fi
+    if [ ${PROVIDER} = 'oracle' ]; then
         oci_iptables
-    fi           
+    fi
 }
 
 ubuntu_service_check(){
     check_sql_ver
     for ITEM in lsws memcached redis-server mariadb
-    do 
+    do
         service ${ITEM} status | grep "active\|running" > /dev/null 2>&1
-        if [ $? = 0 ]; then 
+        if [ $? = 0 ]; then
             echoG "Process ${ITEM} is active"
         else
-            echoR "Please check Process ${ITEM}" 
+            echoR "Please check Process ${ITEM}"
             ALLERRORS=1
         fi
-    done        
-    if [[ "${ALLERRORS}" = 0 ]]; then 
+    done
+    if [[ "${ALLERRORS}" = 0 ]]; then
         echoG "Congratulations! Installation finished."
     else
         echoR "Some errors seem to have occured, please check this as you may need to manually fix them"
-    fi        
+    fi
 }
 
 centos_service_check(){
     check_sql_ver
     for ITEM in lsws memcached redis mariadb
-    do 
+    do
         service ${ITEM} status | grep "active\|running" > /dev/null 2>&1
-        if [ $? = 0 ]; then 
+        if [ $? = 0 ]; then
             echoG "Process ${ITEM} is active"
         else
-            echoR "Please check Process ${ITEM}" 
+            echoR "Please check Process ${ITEM}"
             ALLERRORS=1
         fi
-    done        
-    if [[ "${ALLERRORS}" = 0 ]]; then 
+    done
+    if [[ "${ALLERRORS}" = 0 ]]; then
         echoG "Congratulations! Installation finished."
     else
         echoR "Some errors seem to have occured, please check this as you may need to manually fix them"
-    fi        
+    fi
 }
 
 init_check(){
@@ -1457,7 +1457,7 @@ init_check(){
 init_setup(){
     system_upgrade
     prepare
-}   
+}
 
 centos_main_install(){
     centos_install_basic
@@ -1491,8 +1491,8 @@ ubuntu_main_install(){
 ubuntu_main_config(){
     ubuntu_config_ols
     ubuntu_config_memcached
-    ubuntu_config_redis   
-    wp_main_config 
+    ubuntu_config_redis
+    wp_main_config
 }
 
 wp_config(){

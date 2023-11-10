@@ -14,9 +14,9 @@ if [ -e "${LSDIR}/conf/vhosts/wordpress/vhconf.conf" ]; then
 elif [ -e "${LSDIR}/conf/vhosts/classicpress/vhconf.conf" ]; then
     VHNAME='classicpress'
 elif [ -e "${LSDIR}/conf/vhosts/joomla/vhconf.conf" ]; then
-    VHNAME='joomla'   
+    VHNAME='joomla'
 elif [ -e "${LSDIR}/conf/vhosts/drupal/vhconf.conf" ]; then
-    VHNAME='drupal'  
+    VHNAME='drupal'
     DOCHM='/var/www/html/web'
 else
     VHNAME='Example'
@@ -46,49 +46,49 @@ check_os(){
         OSVER=$(cat /etc/redhat-release | awk '{print substr($4,1,1)}')
         BOTCRON='/etc/crontab'
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu    
+        OSNAME=ubuntu
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 
 providerck()
 {
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ -d /proc/vz/ ]; then
         PROVIDER='vm'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='aliyun'   
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-        PROVIDER='azure'  
+        PROVIDER='aliyun'
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+        PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'          
+        PROVIDER='oracle'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 
 get_ip()
 {
-    if [ ${PROVIDER} = 'vm' ]; then 
-        MY_IP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0") 
-    elif [ ${PROVIDER} = 'aws' ]; then 
-        MY_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4) 
-    elif [ ${PROVIDER} = 'google' ]; then 
+    if [ ${PROVIDER} = 'vm' ]; then
+        MY_IP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")
+    elif [ ${PROVIDER} = 'aws' ]; then
+        MY_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+    elif [ ${PROVIDER} = 'google' ]; then
         MY_IP=$(curl -s -H "Metadata-Flavor: Google" \
-        http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)    
+        http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
     elif [ ${PROVIDER} = 'aliyun' ]; then
-        MY_IP=$(curl -s http://100.100.100.200/latest/meta-data/eipv4)   
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-        MY_IP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")    
+        MY_IP=$(curl -s http://100.100.100.200/latest/meta-data/eipv4)
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+        MY_IP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")
     else
-        MY_IP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0") 
-  fi    
+        MY_IP=$(curl -s http://checkip.amazonaws.com || printf "0.0.0.0")
+  fi
 }
 
 domainhelp(){
@@ -102,8 +102,8 @@ domainhelp(){
 restart_lsws(){
     ${LSDIR}/bin/lswsctrl stop >/dev/null 2>&1
     systemctl stop lsws >/dev/null 2>&1
-    systemctl start lsws >/dev/null 2>&1    
-}   
+    systemctl start lsws >/dev/null 2>&1
+}
 
 domain_filter(){
     DOMAIN="${1}"
@@ -144,9 +144,9 @@ www_domain(){
 
 domainadd(){
     duplicateck ${DOMAIN} ${WEBCF}
-    if [ ${?} = 1 ]; then 
+    if [ ${?} = 1 ]; then
         if [ ${PROVIDER} = 'do' ]; then
-            sed -i 's|'${VHNAME}' '${MY_IP}'|'${VHNAME}' '${MY_IP}', '${DOMAIN}', '${WWW_DOMAIN}' |g' ${WEBCF}                    
+            sed -i 's|'${VHNAME}' '${MY_IP}'|'${VHNAME}' '${MY_IP}', '${DOMAIN}', '${WWW_DOMAIN}' |g' ${WEBCF}
         else
             sed -i 's|'${VHNAME}' \*|'${VHNAME}' \*, '${DOMAIN}', '${WWW_DOMAIN}' |g' ${WEBCF}
         fi
@@ -165,8 +165,8 @@ domainverify(){
             echoG "[OK] ${WWW_DOMAIN} is accessible."
             TYPE=2
         else
-            echo "${WWW_DOMAIN} is inaccessible." 
-        fi        
+            echo "${WWW_DOMAIN} is inaccessible."
+        fi
     else
         echo "${DOMAIN} is inaccessible, please verify!"; exit 1
     fi
@@ -182,7 +182,7 @@ main_domain_setup(){
             domainadd
             break
         fi
-    done    
+    done
 }
 emailinput(){
     CKREG="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
@@ -193,7 +193,7 @@ emailinput(){
       printf "%s"  "Please verify it is correct: [y/N] "
     else
       echo -e "\nPlease enter a valid E-mail, exit setup\n"; exit 1
-    fi  
+    fi
 }
 
 rstlswscron(){
@@ -202,7 +202,7 @@ rstlswscron(){
 
 certbothook(){
     grep 'certbot.*restart lsws' ${BOTCRON} >/dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG 'Web Server Restart hook already set!'
     else
         if [ "${OSNAME}" = 'ubuntu' ] || [ "${OSNAME}" = 'debian' ] ; then
@@ -217,15 +217,15 @@ certbothook(){
             else
                 echoY 'Please check certbot crontab'
             fi
-        fi    
+        fi
         rstlswscron
         grep 'restart lsws' ${BOTCRON} > /dev/null 2>&1
-        if [ ${?} = 0 ]; then 
+        if [ ${?} = 0 ]; then
             echoG 'Certbot hook update success'
-        else 
+        else
             echoY 'Please check certbot crond'
         fi
-    fi       
+    fi
 }
 
 lecertapply(){
@@ -234,7 +234,7 @@ lecertapply(){
     elif [ ${TYPE} = 2 ]; then
         certbot certonly --non-interactive --agree-tos -m ${EMAIL} --webroot -w ${DOCHM} -d ${DOMAIN} -d ${WWW_DOMAIN}
     else
-        echo 'Unknown type!'; exit 2    
+        echo 'Unknown type!'; exit 2
     fi
     if [ ${?} -eq 0 ]; then
         echo "vhssl  {
@@ -251,22 +251,22 @@ lecertapply(){
 }
 
 force_https() {
-    if [ "${VHNAME}" != 'Example' ]; then 
+    if [ "${VHNAME}" != 'Example' ]; then
         duplicateck "RewriteCond %{HTTPS} on" "${DOCHM}/.htaccess"
-        if [ ${?} = 1 ]; then 
+        if [ ${?} = 1 ]; then
             echo "$(echo '
-### Forcing HTTPS rule start       
+### Forcing HTTPS rule start
 RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 ### Forcing HTTPS rule end
             ' | cat - ${DOCHM}/.htaccess)" > ${DOCHM}/.htaccess
         fi
-    else 
+    else
         sed -i '/^  logLevel                0/a\ \ rules                   <<<END_rules \
 RewriteCond %{SERVER_PORT} 80\nRewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]\
-\ \ END_rules' ${LSVHCFPATH}   
-    fi    
+\ \ END_rules' ${LSVHCFPATH}
+    fi
     echoG "Force HTTPS rules has been added success."
 }
 
@@ -277,16 +277,16 @@ endsetup(){
 aptupgradelist() {
     PACKAGE=$(cat ${UPDATELIST} | awk '{print $1}' | sed -n 2p)
     SECURITY=$(cat ${UPDATELIST} | awk '{print $1}' | sed -n 3p)
-    if [ "${PACKAGE}" = '0' ] && [ "${SECURITY}" = '0' ]; then 
-        UPDATE='FALSE'    
-    fi    
+    if [ "${PACKAGE}" = '0' ] && [ "${SECURITY}" = '0' ]; then
+        UPDATE='FALSE'
+    fi
 }
 
 yumupgradelist(){
     PACKAGE=$(yum check-update | grep -v '*\|Load*\|excluded' | wc -l)
-    if [ "${PACKAGE}" = '0' ]; then 
+    if [ "${PACKAGE}" = '0' ]; then
         UPDATE='FALSE'
-    fi    
+    fi
 }
 
 aptgetupgrade() {
@@ -297,7 +297,7 @@ aptgetupgrade() {
     if [ -f /etc/apt/sources.list.d/mariadb_repo.list ]; then
         ### an apt bug
         mv  /etc/apt/sources.list.d/mariadb_repo.list /tmp/
-    fi    
+    fi
     #DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' dist-upgrade > /dev/null 2>&1
     echo -ne '####################      (99%)\r'
     apt-get clean > /dev/null 2>&1
@@ -316,44 +316,44 @@ main_cert_setup(){
     read TMP_YN
     if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
         domainverify
-        while true; do 
+        while true; do
             emailinput
             read TMP_YN
             if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
                 lecertapply
                 break
             fi
-        done   
-        certbothook 
+        done
+        certbothook
         printf "%s"   "Do you wish to force HTTPS rewrite rule for this domain? [y/N] "
         read TMP_YN
         if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
             force_https
         fi
         restart_lsws
-    fi        
+    fi
 }
 
 main_upgrade(){
     if [ "${OSNAME}" = 'ubuntu' ]; then
         if [ ${PROVIDER} != 'aliyun' ]; then
             aptupgradelist
-        fi    
+        fi
     else
         yumupgradelist
-    fi    
+    fi
     #if [ "${UPDATE}" = 'TRUE' ]; then
         printf "%s"   "Do you wish to update the system now? This will update the web server as well. [Y/n]? "
         read TMP_YN
         if [[ ! "${TMP_YN}" =~ ^(n|N) ]]; then
-            echoG "Update Starting..." 
-            if [ "${OSNAME}" = 'ubuntu' ]; then 
+            echoG "Update Starting..."
+            if [ "${OSNAME}" = 'ubuntu' ]; then
                 aptgetupgrade
             else
                 yumupgrade
-            fi    
-            echoG "\nUpdate complete" 
-        fi    
+            fi
+            echoG "\nUpdate complete"
+        fi
     #else
     #    echoG 'Your system is up to date'
     #fi
@@ -361,7 +361,7 @@ main_upgrade(){
         echoG "\nEnjoy your accelarated OpenLiteSpeed server!\n"
     else
         echoG "\nEnjoy your accelarated CyberPanel server!\n"
-    fi    
+    fi
 }
 
 main(){
@@ -371,7 +371,7 @@ main(){
     if [ ! -d /usr/local/CyberCP ]; then
         main_domain_setup
         main_cert_setup
-    fi   
+    fi
     main_upgrade
     endsetup
 }

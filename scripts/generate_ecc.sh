@@ -26,8 +26,8 @@ domainverify(){
             echoG "[OK] ${WWW_DOMAIN} is accessible."
             TYPE=2
         else
-            echo "${WWW_DOMAIN} is inaccessible." 
-        fi        
+            echo "${WWW_DOMAIN} is inaccessible."
+        fi
     else
         echo "${DOMAIN} is inaccessible, please verify!"; exit 1
     fi
@@ -77,7 +77,7 @@ generate_ecc_ssl_certificate(){
     w_webroot=${3}
     w_path=$letsencrypt_path${w_domain}/
 
-    # get the $DOMAIN and $WWW_DOMAIN 
+    # get the $DOMAIN and $WWW_DOMAIN
     www_domain $w_domain
 
     # get TYPE1:(one domain) and TYPE2:(two domains)
@@ -106,14 +106,14 @@ $w_domain
 .
 .
 csrconf
-        certbot certonly --non-interactive --agree-tos --email $w_email --webroot -w $w_webroot -d $DOMAIN --csr ecc.csr 
+        certbot certonly --non-interactive --agree-tos --email $w_email --webroot -w $w_webroot -d $DOMAIN --csr ecc.csr
     elif [ ${TYPE} = 2 ]; then
         openssl ecparam -genkey -name secp384r1 | sudo openssl ec -out ecc.key >> $LOG_FILE 2>&1
         generate_csr_conf_two_domains $DOMAIN $WWW_DOMAIN >> $LOG_FILE 2>&1
         openssl req -new -sha256 -key ecc.key -nodes -out ecc.csr -outform pem -config $CSR_CONF_FILE >> $LOG_FILE 2>&1
         certbot certonly --non-interactive --agree-tos --email $w_email --webroot -w $w_webroot -d $DOMAIN -d $WWW_DOMAIN  --csr ecc.csr
     else
-        echo 'Unknown type!'; exit 2    
+        echo 'Unknown type!'; exit 2
     fi
 
     remove_temporary_file
@@ -121,7 +121,7 @@ csrconf
     mv *pem $w_path >> $LOG_FILE 2>&1
     echow "SSLCertificateFile /etc/letsencrypt/live/{DOMAIN}/0001_chain.pem"
     echow "SSLCertificateKeyFile /etc/letsencrypt/live/{DOMAIN}/ecc.key"
-    
+
 }
 
 

@@ -101,13 +101,13 @@ function check_provider
     if [ "$(dmidecode -s bios-vendor)" = 'Vultr' ];then
         echoG 'Platform Provider is Vultr'
     else
-        echoR 'Platform Provider is not Vultr, do you still want to continue? [y/N] ' 
+        echoR 'Platform Provider is not Vultr, do you still want to continue? [y/N] '
         read TMP_YN
         if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
             echoG 'Continue the setup'
         else
-            exit 0    
-        fi        
+            exit 0
+        fi
     fi
 }
 
@@ -120,7 +120,7 @@ function check_lan_ipv4
         echoR "No IP mathc with ^${LAN_IP_FILTER} filter, please check manually! exit! "
         ip addr; exit 1
     elif [ "${FILTER_MATCH_NUM}" = '1' ]; then
-        echoG "Found IP for NFS service: ${FILTER_RESULT}" 
+        echoG "Found IP for NFS service: ${FILTER_RESULT}"
     else
         echoY "Found multiple IP match with ^${LAN_IP_FILTER} filter, please check it manually! exit!"
         ip addr; exit 1
@@ -133,10 +133,10 @@ function usage
     echo -e "\033[1mOPTIONS\033[0m"
     echoW " --dbname [DATABASENAME]           " "To set the database name in the database instead of using a random one."
     echoW " --dbuser [DBUSERNAME]             " "To set the APP username in the database instead of using a random one."
-    echoW " --dbpassword [PASSWORD]           " "To set the APP user password in database instead of using a random one."    
+    echoW " --dbpassword [PASSWORD]           " "To set the APP user password in database instead of using a random one."
     echoNW "  -H,    --help                   " "${EPACE} To display help messages."
     echo
-    exit 0    
+    exit 0
 }
 
 function change_owner
@@ -152,7 +152,7 @@ function prepare_data_dir
 
 function centos_install_nfs
 {
-    silent ${YUM} -y install nfs-utils nfs-utils-lib 
+    silent ${YUM} -y install nfs-utils nfs-utils-lib
 }
 
 
@@ -180,7 +180,7 @@ function set_nfs
     if [ "$OSNAME" = "centos" ] ; then
         silent  systemctl restart nfs
     else
-        silent systemctl restart nfs-kernel-server   
+        silent systemctl restart nfs-kernel-server
     fi
 }
 
@@ -190,10 +190,10 @@ function disable_needrestart
     if [ -d /etc/needrestart/conf.d ]; then
         echoG 'List Restart services only'
         cat >> /etc/needrestart/conf.d/disable.conf <<END
-# Restart services (l)ist only, (i)nteractive or (a)utomatically. 
-\$nrconf{restart} = 'l'; 
-# Disable hints on pending kernel upgrades. 
-\$nrconf{kernelhints} = 0;         
+# Restart services (l)ist only, (i)nteractive or (a)utomatically.
+\$nrconf{restart} = 'l';
+# Disable hints on pending kernel upgrades.
+\$nrconf{kernelhints} = 0;
 END
     fi
 }
@@ -213,24 +213,24 @@ function check_os
     if [ -f /etc/centos-release ] ; then
         OSNAME=centos
     elif [ -f /etc/redhat-release ] ; then
-        OSNAME=centos        
+        OSNAME=centos
     elif [ -f /etc/lsb-release ] ; then
         OSNAME=ubuntu
     elif [ -f /etc/debian_version ] ; then
-        OSNAME=debian        
+        OSNAME=debian
     else
         echoR 'Platform is not support, exit!'; exit 1
     fi
 }
 
-function db_password_file    
+function db_password_file
 {
     echoG 'Create db fiile'
-    if [ -f ${DBPASSPATH} ]; then 
+    if [ -f ${DBPASSPATH} ]; then
         echoY "${DBPASSPATH} already exist!, will recreate a new file"
         rm -f ${DBPASSPATH}
-    fi    
-    touch "${DBPASSPATH}" 
+    fi
+    touch "${DBPASSPATH}"
 }
 
 function save_db_root_pwd
@@ -245,18 +245,18 @@ function save_db_user_pwd
 
 function random_password
 {
-    if [ ! -z ${1} ]; then 
+    if [ ! -z ${1} ]; then
         TEMPPASSWORD="${1}"
-    else    
+    else
         TEMPPASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16 ; echo '')
     fi
 }
 
 function random_strong_password
 {
-    if [ ! -z ${1} ]; then 
+    if [ ! -z ${1} ]; then
         TEMPPASSWORD="${1}"
-    else    
+    else
         TEMPPASSWORD=$(openssl rand -base64 32)
     fi
 }
@@ -268,9 +268,9 @@ function main_gen_password
     random_password "${USERNAME}"
     USERNAME="${TEMPPASSWORD}"
     random_password "${DATABASENAME}"
-    DATABASENAME="${TEMPPASSWORD}"     
+    DATABASENAME="${TEMPPASSWORD}"
     random_strong_password "${USERPASSWORD}"
-    USERPASSWORD="${TEMPPASSWORD}" 
+    USERPASSWORD="${TEMPPASSWORD}"
 }
 
 function centos_install_mariadb
@@ -279,7 +279,7 @@ function centos_install_mariadb
     silent ${YUM} -y install MariaDB-server MariaDB-client
     silent systemctl enable mariadb
     silent systemctl start  mariadb
-}    
+}
 
 function debian_install_mariadb
 {
@@ -289,7 +289,7 @@ function debian_install_mariadb
     if [ ${?} != 0 ]; then
         service mariadb start
     fi
-}    
+}
 
 function check_cur_status
 {
@@ -297,7 +297,7 @@ function check_cur_status
     if [ $? = 0 ] ; then
         echoY 'MariaDB is already installed, exit!'; exit 1
     fi
-}    
+}
 
 function install_mariadb
 {
@@ -312,8 +312,8 @@ function install_mariadb
         echoR "Please fix this error and try again. Aborting installation!"
         exit 1
     fi
-    echoG "End Install MariaDB"    
-}    
+    echoG "End Install MariaDB"
+}
 
 function set_db_root
 {
@@ -322,7 +322,7 @@ function set_db_root
     mysqladmin -uroot -p$ROOTPASSWORD password $ROOTPASSWORD
     if [ $? != 0 ] ; then
         echoR "Failed to set MySQL root password to $ROOTPASSWORD, it may already have a root password."
-    fi    
+    fi
 }
 
 function set_db_user
@@ -341,7 +341,7 @@ function set_db_user
             echoR "Please check this and update the wp-config.php file."
             ERROR="Create user error"
         fi
-    fi    
+    fi
     mysql -uroot -p$ROOTPASSWORD  -e "CREATE DATABASE IF NOT EXISTS $DATABASENAME;"
     if [ $? = 0 ] ; then
         mysql -uroot -p$ROOTPASSWORD  -e "GRANT ALL PRIVILEGES ON $DATABASENAME.* TO '$USERNAME'@localhost IDENTIFIED BY '$USERPASSWORD';"
@@ -360,7 +360,7 @@ function set_db_user
         echoG "Finished MySQL setup without error."
     else
         echoR "Finished MySQL setup - some error(s) occured."
-    fi    
+    fi
 }
 
 function check_value_follow
@@ -393,17 +393,17 @@ function befor_install_display
     echoY "MariaDB root Password:    " "$ROOTPASSWORD"
     echoY "Database name:            " "$DATABASENAME"
     echoY "Database username:        " "$USERNAME"
-    echoY "Database password:        " "$USERPASSWORD"     
+    echoY "Database password:        " "$USERPASSWORD"
     echo
-    echoNW "Your password will be written to file: ${DBPASSPATH}"  
+    echoNW "Your password will be written to file: ${DBPASSPATH}"
     printf 'Are these settings correct? Type n to quit, otherwise will continue. [Y/n]  '
         read answer
         if [ "$answer" = "N" ] || [ "$answer" = "n" ] ; then
             echoG "Aborting installation!"
             exit 0
-        fi    
-    echoCYAN 'Start OpenLiteSpeed one click installation >> >> >> >> >> >> >>'    
-}    
+        fi
+    echoCYAN 'Start OpenLiteSpeed one click installation >> >> >> >> >> >> >>'
+}
 
 function after_install_display
 {
@@ -414,7 +414,7 @@ function after_install_display
     fi
         echoCYAN 'End OpenLiteSpeed one click installation << << << << << << <<'
     echo
-}    
+}
 
 function main_mariadb
 {
@@ -456,30 +456,30 @@ function main
     main_mariadb
     main_nfs
     after_install_display
-}    
+}
 
 
 while [ ! -z "${1}" ] ; do
     case "${1}" in
-        --dbname )         
+        --dbname )
                 check_value_follow "$2" "database name"
                 shift
                 DATABASENAME=$FOLLOWPARAM
                 ;;
-        --dbuser )         
+        --dbuser )
                 check_value_follow "$2" "database username"
                 shift
                 USERNAME=$FOLLOWPARAM
                 ;;
-        --dbpassword )     
+        --dbpassword )
                 check_value_follow "$2" ""
                 if [ ! -z "$FOLLOWPARAM" ] ; then shift; fi
                 USERPASSWORD=$FOLLOWPARAM
-                ;;    
-        -[hH] | --help )           
+                ;;
+        -[hH] | --help )
                 usage
-                ;;                
-        * )                     
+                ;;
+        * )
                 usage
                 ;;
     esac

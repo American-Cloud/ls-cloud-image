@@ -11,28 +11,28 @@ check_os(){
     if [ -f /etc/redhat-release ] ; then
         OSNAME=centos
     elif [ -f /etc/lsb-release ] ; then
-        OSNAME=ubuntu    
+        OSNAME=ubuntu
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 
 providerck()
 {
-    if [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s bios-vendor)" = 'Vultr' ];then
-        PROVIDER='vultr'        
+        PROVIDER='vultr'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
         PROVIDER='ali'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
         PROVIDER='azure'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 
@@ -56,7 +56,7 @@ stop_aegis(){
     killall -9 AliYunDun AliHids AliYunDunUpdate >/dev/null 2>&1
     if [ -f "/etc/init.d/aegis" ]; then
         /etc/init.d/aegis stop  >/dev/null 2>&1
-    fi    
+    fi
     printf "%-40s %40s\n" "Stopping aegis" "[  OK  ]"
 }
 
@@ -67,7 +67,7 @@ remove_aegis(){
         rm -rf ${AGENT_PATH}/alihids
         rm -rf ${AGENT_PATH}/aegis_quartz
         rm -f /etc/init.d/aegis
-    fi  
+    fi
 }
 
 remove_user(){
@@ -81,7 +81,7 @@ remove_user(){
 }
 
 uninstall_aegis(){
-    if [ "${PROVIDER}" = 'ali' ]; then 
+    if [ "${PROVIDER}" = 'ali' ]; then
         stop_aegis
         remove_aegis
     fi
@@ -90,7 +90,7 @@ uninstall_aegis(){
 install_cloudinit(){
     if [ ! -d ${CLDINITPATH} ]; then
         mkdir -p ${CLDINITPATH}
-    fi    
+    fi
     which cloud-init >/dev/null 2>&1
     if [ ${?} = 1 ]; then
         if [ "${PROVIDER}" = 'ali' ]; then
@@ -106,11 +106,11 @@ install_cloudinit(){
         fi
         systemctl start cloud-init >/dev/null 2>&1
         systemctl enable cloud-init >/dev/null 2>&1
-    fi    
+    fi
 }
 
 setup_cloud(){
-    cat > ${CLDINITPATH}/per-instance.sh <<END 
+    cat > ${CLDINITPATH}/per-instance.sh <<END
 #!/bin/bash
 MAIN_URL='https://raw.githubusercontent.com/litespeedtech/ls-cloud-image/master/Cloud-init/per-instance.sh'
 BACK_URL='https://cloud.litespeed.sh/Cloud-init/per-instance.sh'
@@ -124,17 +124,17 @@ cleanup (){
     if [ -d /usr/local/CyberCP ]; then
         if [ "${OSNAME}" != 'centos' ]; then
             sudo apt-get remove firewalld -y > /dev/null 2>&1
-        fi    
+        fi
     fi
     if [ "${OSNAME}" = 'ubuntu' ]; then
         sudo apt-get remove unattended-upgrades -y > /dev/null 2>&1
-        if [ -e /etc/apt/apt.conf.d/10periodic ]; then 
+        if [ -e /etc/apt/apt.conf.d/10periodic ]; then
             sed -i 's/1/0/g' /etc/apt/apt.conf.d/10periodic
-        fi 
+        fi
     fi
-    if [ "${PROVIDER}" = 'do' ]; then 
+    if [ "${PROVIDER}" = 'do' ]; then
         apt-get purge droplet-agent -y > /dev/null 2>&1
-    fi    
+    fi
     # Legal
     if [ -f /etc/legal ]; then
         mv /etc/legal /etc/legal.bk
@@ -186,7 +186,7 @@ cleanup (){
     rm -f /var/log/mail.log*
     rm -f /var/log/mail.err
     rm -f /var/log/letsencrypt/letsencrypt.log*
-    rm -f /var/log/fail2ban.log* 
+    rm -f /var/log/fail2ban.log*
     rm -f /var/log/mysql/error.log
     rm -rf /var/log/*.gz
     rm -f /var/log/redis/redis-server.log
@@ -221,10 +221,10 @@ cleanup (){
         if [ -d /home/ubuntu ]; then
             rm -f /home/ubuntu/.mysql_history
             rm -f /home/ubuntu/.bash_history
-            rm -f /home/ubuntu/.ssh/authorized_keys   
+            rm -f /home/ubuntu/.ssh/authorized_keys
             rm -f /home/ubuntu/.litespeed_password
-        fi    
-    fi  
+        fi
+    fi
     if [ "${PROVIDER}" = 'google' ] || [ "${PROVIDER}" = 'azure' ]; then
         sudo passwd -d root >/dev/null 2>&1
         sudo sed -i 's/root::/root:*:/g' /etc/shadow >/dev/null 2>&1
@@ -234,7 +234,7 @@ cleanup (){
                 rm -rf "/home/${i}"
                 deluser "$i"
             fi
-        done  
+        done
     fi
 }
 

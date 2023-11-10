@@ -40,7 +40,7 @@ linechange(){
     if [ -n "$LINENUM" ] && [ "$LINENUM" -eq "$LINENUM" ] 2>/dev/null; then
         sed -i "${LINENUM}d" ${2}
         sed -i "${LINENUM}i${3}" ${2}
-    fi  
+    fi
 }
 
 check_os(){
@@ -54,24 +54,24 @@ check_os(){
         OSNAMEVER="UBUNTU$(lsb_release -sr | awk -F '.' '{print $1}')"
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi         
+    fi
 }
 
 check_provider(){
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then 
+    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
         PROVIDER='aws'
     elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'      
+        PROVIDER='google'
     elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
         PROVIDER='do'
     elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='aliyun'  
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then    
-        PROVIDER='azure' 
+        PROVIDER='aliyun'
+    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
+        PROVIDER='azure'
     elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'          
+        PROVIDER='oracle'
     else
-        PROVIDER='undefined'  
+        PROVIDER='undefined'
     fi
 }
 
@@ -83,7 +83,7 @@ centos_sys_upgrade(){
     echoG 'Updating system'
     echo -ne '#                         (5%)\r'
     yum update -y > /dev/null 2>&1
-    echo -e '#######################   (100%)\r'   
+    echo -e '#######################   (100%)\r'
 }
 
 ubuntu_sys_upgrade(){
@@ -96,8 +96,8 @@ ubuntu_sys_upgrade(){
     echo -ne '####################      (99%)\r'
     apt-get clean > /dev/null 2>&1
     apt-get autoclean > /dev/null 2>&1
-    echo -e '#######################   (100%)\r'    
-}    
+    echo -e '#######################   (100%)\r'
+}
 
 output_msg(){
     if [ ${1} = 0 ]; then
@@ -105,7 +105,7 @@ output_msg(){
     else
         echoR "[X] ${2} install, abort!"
         exit 1
-    fi  
+    fi
 }
 
 symlink(){
@@ -117,8 +117,8 @@ symlink(){
         ln -s "${1}" "${2}"
         chmod 777 ${2}
     else
-        echoR "${1} does not exist, skip!"    
-    fi    
+        echoR "${1} does not exist, skip!"
+    fi
 }
 
 centos_install_basic(){
@@ -132,11 +132,11 @@ ubuntu_install_basic(){
     apt-get -y install wget > /dev/null 2>&1
     apt-get -y install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev \
       zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev libsqlite3-dev > /dev/null 2>&1
-    if [ "${OSNAMEVER}" = 'UBUNTU18' ]; then 
+    if [ "${OSNAMEVER}" = 'UBUNTU18' ]; then
         apt-get -y install libgdbm5 > /dev/null 2>&1
     else
         apt-get -y install libgdbm6 > /dev/null 2>&1
-    fi    
+    fi
 }
 
 install_ols(){
@@ -171,13 +171,13 @@ ubuntu_install_nodejs(){
     curl -sL https://deb.nodesource.com/setup_${NODEJSV}.x | sudo -E bash - > /dev/null 2>&1
     apt-get install nodejs -y > /dev/null 2>&1
     NODE_V="$(node --version)"
-    NPM_V="$(npm --version)"  
+    NPM_V="$(npm --version)"
 }
 
 install_rbenv(){
     echoG 'Install rbenv'
     git clone --quiet https://github.com/rbenv/rbenv.git ${CLONE_PATH}/.rbenv
-    git clone --quiet https://github.com/rbenv/ruby-build.git ${CLONE_PATH}/.rbenv/plugins/ruby-build   
+    git clone --quiet https://github.com/rbenv/ruby-build.git ${CLONE_PATH}/.rbenv/plugins/ruby-build
     echo "export PATH=\"${CLONE_PATH}/.rbenv/bin:$PATH\"" >> ~/.bashrc
     echo "export PATH=\"${CLONE_PATH}/.rbenv/plugins/ruby-build/bin:$PATH\"" >> ~/.bashrc
     export PATH="${CLONE_PATH}/.rbenv/bin:$PATH"
@@ -216,7 +216,7 @@ install_bundler(){
     gem install bundler --no-document > /dev/null 2>&1
     symlink "${CLONE_PATH}/.rbenv/versions/${RUBYV}/bin/bundler" '/usr/bin/bundler'
     BUNDLER_V=$(bundler -v)
-    output_msg "${?}" 'bundler'  
+    output_msg "${?}" 'bundler'
 }
 
 install_spring(){
@@ -228,7 +228,7 @@ install_lsapi(){
     echoG '[Start] Install LSAPI'
     gem install rack --no-document >/dev/null 2>&1
     gem install ruby-lsapi --no-document >/dev/null 2>&1
-    echoG '[End] Install LSAPI'  
+    echoG '[End] Install LSAPI'
 }
 
 install_rails(){
@@ -236,7 +236,7 @@ install_rails(){
     gem install rails >/dev/null 2>&1
     symlink "${CLONE_PATH}/.rbenv/versions/${RUBYV}/bin/rails" '/usr/bin/rails'
     RAILS_V="$(rails -v)"
-    output_msg "${?}" 'rails'   
+    output_msg "${?}" 'rails'
 }
 
 centos_install_rbenv(){
@@ -248,15 +248,15 @@ centos_install_ruby(){
 }
 
 centos_install_gem(){
-    install_gem    
+    install_gem
 }
 
 centos_install_bundler(){
-    install_bundler 
+    install_bundler
 }
 
 centos_install_bundle(){
-    install_bundle 
+    install_bundle
 }
 
 centos_install_spring(){
@@ -268,7 +268,7 @@ centos_install_lsapi(){
 }
 
 centos_install_rails(){
-    install_rails 
+    install_rails
 }
 
 ubuntu_install_rbenv(){
@@ -280,15 +280,15 @@ ubuntu_install_ruby(){
 }
 
 ubuntu_install_gem(){
-    install_gem    
+    install_gem
 }
 
 ubuntu_install_bundler(){
-    install_bundler        
+    install_bundler
 }
 
 ubuntu_install_bundle(){
-    install_bundle 
+    install_bundle
 }
 
 ubuntu_install_spring(){
@@ -300,7 +300,7 @@ ubuntu_install_lsapi(){
 }
 
 ubuntu_install_rails(){
-    install_rails   
+    install_rails
 }
 
 centos_install_certbot(){
@@ -314,29 +314,29 @@ centos_install_certbot(){
     else
         yum -y install certbot  > /dev/null 2>&1
     fi
-    if [ -e /usr/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ]; then
         echoG '[End] Install CertBot'
-    else 
-        echoR 'Please check CertBot'    
-    fi    
+    else
+        echoR 'Please check CertBot'
+    fi
 }
 
-ubuntu_install_certbot(){       
-    echoG "Install CertBot" 
+ubuntu_install_certbot(){
+    echoG "Install CertBot"
     if [ "${OSNAMEVER}" = 'UBUNTU18' ]; then
         add-apt-repository universe > /dev/null 2>&1
         echo -ne '\n' | add-apt-repository ppa:certbot/certbot > /dev/null 2>&1
-    fi    
+    fi
     apt-get update > /dev/null 2>&1
     apt-get -y install certbot > /dev/null 2>&1
-    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then 
+    if [ -e /usr/bin/certbot ] || [ -e /usr/local/bin/certbot ]; then
         if [ ! -e /usr/bin/certbot ]; then
             ln -s /usr/local/bin/certbot /usr/bin/certbot
-        fi    
-        echoG 'Install CertBot finished'    
-    else 
-        echoR 'Please check CertBot'    
-    fi    
+        fi
+        echoG 'Install CertBot finished'
+    else
+        echoR 'Please check CertBot'
+    fi
 }
 
 restart_lsws(){
@@ -348,7 +348,7 @@ restart_lsws(){
 
 config_ols(){
     echoG 'Setting Web Server config'
-    cat > ${LSWSVHCONF} <<END 
+    cat > ${LSWSVHCONF} <<END
 docRoot                   \$VH_ROOT/html/
 enableGzip                1
 
@@ -429,11 +429,11 @@ END
 
 centos_set_ols(){
     config_ols
-}    
+}
 
 ubuntu_set_ols(){
     config_ols
-} 
+}
 
 acme_folder(){
     mkdir -p ${VHDOCROOT}/.well-known
@@ -454,9 +454,9 @@ app_setup(){
     if [ ${?} = 0 ]; then
         NEWKEY='  get "/", to: "rails/welcome#index"'
         linechange '/index' config/routes.rb "${NEWKEY}"
-    else 
+    else
         echoR 'Welcome not exist! Skip setting'
-    fi        
+    fi
     echoG '[End] Install app'
 }
 
@@ -482,7 +482,7 @@ oci_iptables(){
 
 centos_install_firewall(){
     echoG '[Start] Install Firewall'
-    if [ ! -e /usr/sbin/firewalld ]; then 
+    if [ ! -e /usr/sbin/firewalld ]; then
         yum -y install firewalld > /dev/null 2>&1
     fi
     service firewalld start > /dev/null 2>&1
@@ -492,17 +492,17 @@ centos_install_firewall(){
 
 centos_config_firewall(){
     echoG '[Start] Setting Firewall'
-    for PORT in ${FIREWALLLIST}; do 
+    for PORT in ${FIREWALLLIST}; do
         firewall-cmd --permanent --add-port=${PORT}/tcp > /dev/null 2>&1
-    done 
+    done
     firewall-cmd --reload > /dev/null 2>&1
     firewall-cmd --list-all | grep 80 > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG '[End] Setting Firewall'
-    else 
+    else
         echoR '[X] Please check firewalld rules'
-    fi 
-    if [ ${PROVIDER} = 'oracle' ]; then 
+    fi
+    if [ ${PROVIDER} = 'oracle' ]; then
         oci_iptables
     fi
 }
@@ -510,24 +510,24 @@ centos_config_firewall(){
 ubuntu_config_firewall(){
     echoG '[Start] Setting Firewall'
     #ufw status verbose | grep inactive > /dev/null 2>&1
-    #if [ ${?} = 0 ]; then 
+    #if [ ${?} = 0 ]; then
     for PORT in ${FIREWALLLIST}; do
         ufw allow ${PORT} > /dev/null 2>&1
-    done    
+    done
     echo "y" | ufw enable > /dev/null 2>&1
 
     ufw status | grep '80.*ALLOW' > /dev/null 2>&1
-    if [ ${?} = 0 ]; then 
+    if [ ${?} = 0 ]; then
         echoG '[End] Setting Firewall'
-    else 
-        echoR '[X] Please check ufw rules'    
-    fi 
+    else
+        echoR '[X] Please check ufw rules'
+    fi
     #else
-    #    echoG "ufw already enabled"    
+    #    echoG "ufw already enabled"
     #fi
-    if [ ${PROVIDER} = 'oracle' ]; then 
+    if [ ${PROVIDER} = 'oracle' ]; then
         oci_iptables
-    fi    
+    fi
 }
 
 rm_dummy(){
@@ -563,7 +563,7 @@ centos_main_config(){
     centos_config_firewall
 }
 
-ubuntu_main_install(){    
+ubuntu_main_install(){
     ubuntu_install_basic
     ubuntu_install_ols
     ubuntu_install_nodejs
@@ -573,9 +573,9 @@ ubuntu_main_install(){
     ubuntu_install_bundler
     ubuntu_install_bundle
     ubuntu_install_lsapi
-    ubuntu_install_rails    
+    ubuntu_install_rails
     ubuntu_install_certbot
-}    
+}
 
 ubuntu_main_config(){
     ubuntu_set_app
