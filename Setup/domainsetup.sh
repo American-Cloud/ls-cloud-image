@@ -4,6 +4,11 @@
 # @Author:   LiteSpeed Technologies, Inc. (https://www.litespeedtech.com)
 # @Copyright: (c) 2019-2022
 # *********************************************************************/
+
+set -o pipefail  # Return the exit status of the last command that fails in a pipeline.
+                 # helps to capture errors in pipelines more accurately
+shopt -s nullglob  # Enable nullglob - remove pattern if no files match
+
 DOMAIN=''
 WWW_DOMAIN=''
 DOCHM='/var/www/html'
@@ -365,6 +370,8 @@ main_upgrade(){
 }
 
 main(){
+    # Set the custom handler for SIGINT
+    trap 'echo "Ctrl+C pressed. Exiting..."; exit 0' SIGINT
     check_os
     providerck
     get_ip
