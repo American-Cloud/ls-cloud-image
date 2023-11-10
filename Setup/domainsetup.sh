@@ -118,7 +118,7 @@ domain_filter(){
 
 domaininput(){
     printf "%s" "Your domain: "
-    read DOMAIN
+    read -r DOMAIN
     if [ -z "${DOMAIN}" ] ; then
         echo -e "\nPlease input a valid domain\n"
         exit 1
@@ -176,7 +176,7 @@ main_domain_setup(){
     domainhelp
     while true; do
         domaininput
-        read TMP_YN
+        read -r TMP_YN
         if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
             www_domain ${DOMAIN}
             domainadd
@@ -187,7 +187,7 @@ main_domain_setup(){
 emailinput(){
     CKREG="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
     printf "%s" "Please enter your E-mail: "
-    read EMAIL
+    read -r EMAIL
     if [[ ${EMAIL} =~ ${CKREG} ]] ; then
       echo -e "The E-mail you entered is: \e[31m${EMAIL}\e[39m"
       printf "%s"  "Please verify it is correct: [y/N] "
@@ -313,12 +313,12 @@ yumupgrade(){
 }
 main_cert_setup(){
     printf "%s"   "Do you wish to issue a Let's encrypt certificate for this domain? [y/N] "
-    read TMP_YN
+    read -r TMP_YN
     if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
         domainverify
         while true; do
             emailinput
-            read TMP_YN
+            read -r TMP_YN
             if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
                 lecertapply
                 break
@@ -326,7 +326,7 @@ main_cert_setup(){
         done
         certbothook
         printf "%s"   "Do you wish to force HTTPS rewrite rule for this domain? [y/N] "
-        read TMP_YN
+        read -r TMP_YN
         if [[ "${TMP_YN}" =~ ^(y|Y) ]]; then
             force_https
         fi
@@ -344,7 +344,7 @@ main_upgrade(){
     fi
     #if [ "${UPDATE}" = 'TRUE' ]; then
         printf "%s"   "Do you wish to update the system now? This will update the web server as well. [Y/n]? "
-        read TMP_YN
+        read -r TMP_YN
         if [[ ! "${TMP_YN}" =~ ^(n|N) ]]; then
             echoG "Update Starting..."
             if [ "${OSNAME}" = 'ubuntu' ]; then
