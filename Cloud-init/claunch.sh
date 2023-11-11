@@ -141,7 +141,7 @@ cleanup (){
     fi
     #empty tmp
     mkdir -p /tmp
-    rm -rf /tmp/*
+    # rm -rf /tmp/*  #Packer needs this to complete. Clean up of this handled in another Packer provisioner.
     rm -rf /var/tmp/*
     #chmod 1777 /tmp
     #cloud-init here
