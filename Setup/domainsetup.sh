@@ -34,7 +34,7 @@ WWW='FALSE'
 UPDATE='TRUE'
 OSNAME=''
 
-source ../scripts/provider_check.sh
+source /opt/provider_check.sh
 
 echoY() {
     echo -e "\033[38;5;148m${1}\033[39m"
