@@ -386,7 +386,7 @@ END
 
 landing_pg(){
     echoG 'Setting Landing Page'
-    curl -s https://raw.githubusercontent.com/litespeedtech/ls-cloud-image/master/Static/wp-landing.html \
+    curl -s https://raw.githubusercontent.com/American-Cloud/ls-cloud-image/master/Static/wp-landing.html \
     -o ${DOCLAND}/index.html
     if [ -e ${DOCLAND}/index.html ]; then
         echoG 'Landing Page finished'
