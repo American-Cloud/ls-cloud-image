@@ -28,8 +28,6 @@ ALLERRORS=0
 EXISTSQLPASS=''
 NOWPATH=$(pwd)
 
-source ../scripts/provider_check.sh
-
 echoY() {
     echo -e "\033[38;5;148m${1}\033[39m"
 }
@@ -39,6 +37,21 @@ echoG() {
 echoR()
 {
     echo -e "\033[38;5;203m${1}\033[39m"
+}
+
+
+check_provider_script(){
+    echoG 'Downloading Provider Check Script'
+    curl -s https://raw.githubusercontent.com/American-Cloud/ls-cloud-image/master/scripts/provider_check.sh \
+    -o /opt/provider_check.sh
+    if [ -e /opt/provider_check.sh ]; then
+        echoG 'Provider Check Script downloaded'
+        chmod +x /opt/provider_check.sh
+        source /opt/provider_check.sh
+    else
+        echoR "Error Downloading Provider Check Script"
+        exit 1
+    fi
 }
 
 linechange(){
@@ -1428,6 +1441,7 @@ centos_service_check(){
 init_check(){
     START_TIME="$(date -u +%s)"
     check_os
+    check_provider_script
     check_provider
     oshmpath
 }
