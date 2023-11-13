@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
+
 CLDINITPATH='/var/lib/cloud/scripts/per-instance'
 OSNAME=''
+
 setup ()
 {
+  cp scripts/provider_check.sh /opt/provider_check.sh
+
   if [ -e "${CLDINITPATH}/per-instance.sh" ]; then
     rm -rf ${CLDINITPATH}/per-instance.sh
   fi
@@ -30,6 +34,9 @@ EDITION=''
 LSDIR='/usr/local/lsws'
 CONTEXTPATH="\${LSDIR}/Example"
 LSHTTPDCFPATH="\${LSDIR}/conf/httpd_config.conf"
+
+source /opt/provider_check.sh
+
 if [ -e "\${LSDIR}/conf/vhosts/wordpress/vhconf.conf" ]; then
     LSVHCFPATH="\${LSDIR}/conf/vhosts/wordpress/vhconf.conf"
 else
@@ -77,23 +84,7 @@ editioncheck()
 }
 editioncheck
 
-providerck()
-{
-  if [ "\$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" = 'EC2' ] && [ -d /home/ubuntu ]; then
-    PROVIDER='aws'
-  elif [ "\$(dmidecode -s bios-vendor)" = 'Google' ];then
-    PROVIDER='google'
-  elif [ "\$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
-    PROVIDER='do'
-  elif [ "\$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-    PROVIDER='aliyun'
-  elif [ "\$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
-    PROVIDER='azure'
-  else
-    PROVIDER='undefined'
-  fi
-}
-providerck
+check_provider
 
 pathupdate()
 {

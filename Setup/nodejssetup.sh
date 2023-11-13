@@ -18,6 +18,8 @@ ALLERRORS=0
 NODEJSV='18'
 NOWPATH=$(pwd)
 
+source ../scripts/provider_check.sh
+
 echoY(){
     echo -e "\033[38;5;148m${1}\033[39m"
 }
@@ -49,24 +51,6 @@ check_os(){
         OSNAMEVER="UBUNTU$(lsb_release -sr | awk -F '.' '{print $1}')"
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi
-}
-
-check_provider(){
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
-        PROVIDER='aws'
-    elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'
-    elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
-        PROVIDER='do'
-    elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='aliyun'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
-        PROVIDER='azure'
-    elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'
-    else
-        PROVIDER='undefined'
     fi
 }
 

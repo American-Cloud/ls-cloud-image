@@ -40,6 +40,8 @@ CLASSICPRESS='OFF'
 DB_TEST=0
 EPACE='        '
 
+source ../scripts/provider_check.sh
+
 echoR() {
     echo -e "\e[31m${1}\e[39m"
 }
@@ -222,22 +224,6 @@ function check_os
     fi
 }
 
-check_provider()
-{
-    if [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
-        PROVIDER='aws'
-    elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'
-    elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='aliyun'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
-        PROVIDER='azure'
-    elif [ -e /etc/oracle-cloud-agent/ ]; then
-        PROVIDER='oracle'
-    else
-        PROVIDER='undefined'
-    fi
-}
 check_home_path()
 {
     if [ ${PROVIDER} = 'aws' ] && [ -d /home/ubuntu ]; then
@@ -1221,9 +1207,9 @@ main() {
     main_set_vh ${MY_DOMAIN}
     issue_cert
     install_unzip
-	check_which_cms
+    check_which_cms
     check_install_wp
-	check_install_cp
+    check_install_cp
     check_create_db
     force_https
     end_msg

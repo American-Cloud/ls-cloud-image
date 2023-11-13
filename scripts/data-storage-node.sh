@@ -10,6 +10,8 @@ LAN_IP_FILTER='10.'
 FILTER_NETMASK='20'
 ALLERRORS=0
 
+source ../scripts/provider_check.sh
+
 function echoY
 {
     FLAG=$1
@@ -96,9 +98,9 @@ function check_rsync
     fi
 }
 
-function check_provider
+function check_provider_is_vultr
 {
-    if [ "$(dmidecode -s bios-vendor)" = 'Vultr' ];then
+    if [ "${PROVIDER}" = 'Vultr' ];then
         echoG 'Platform Provider is Vultr'
     else
         echoR 'Platform Provider is not Vultr, do you still want to continue? [y/N] '
@@ -437,6 +439,7 @@ function main_init_check
     check_root
     check_os
     check_provider
+    check_provider_is_vultr
     check_lan_ipv4
     check_cur_status
 }

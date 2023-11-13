@@ -18,6 +18,8 @@ EPACE='        '
 start_mark='{'
 end_mark='}'
 
+source ../scripts/provider_check.sh
+
 echow(){
     FLAG=${1}
     shift
@@ -32,9 +34,6 @@ check_os() {
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
     fi
-}
-
-providerck() {
     if ! hash dmidecode > /dev/null 2>&1 ; then
         if [[ $OSNAME == "ubuntu" ]] || [[ $OSNAME == "debian" ]] ; then
             apt install -y dmidecode
@@ -42,20 +41,6 @@ providerck() {
         if [[ $OSNAME == "centos" ]] ; then
             yum install -y dmidecode
         fi
-    fi
-
-    if [ -e /sys/devices/virtual/dmi/id/product_uuid ] && [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
-        PROVIDER='aws'
-    elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'
-    elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
-        PROVIDER='do'
-    elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='aliyun'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
-        PROVIDER='azure'
-    else
-        PROVIDER='undefined'
     fi
 }
 
@@ -643,7 +628,7 @@ main_to_lsws(){
 
 check_os
 
-providerck
+check_provider
 
 case ${1} in
     -[hH] | -help | --help)

@@ -7,6 +7,8 @@
 CLDINITPATH='/var/lib/cloud/scripts/per-instance'
 AGENT_PATH='/usr/local/aegis'
 
+source ../scripts/provider_check.sh
+
 check_os(){
     if [ -f /etc/redhat-release ] ; then
         OSNAME=centos
@@ -14,25 +16,6 @@ check_os(){
         OSNAME=ubuntu
     elif [ -f /etc/debian_version ] ; then
         OSNAME=debian
-    fi
-}
-
-providerck()
-{
-    if [[ "$(sudo cat /sys/devices/virtual/dmi/id/product_uuid | cut -c 1-3)" =~ (EC2|ec2) ]]; then
-        PROVIDER='aws'
-    elif [ "$(dmidecode -s bios-vendor)" = 'Google' ];then
-        PROVIDER='google'
-    elif [ "$(dmidecode -s bios-vendor)" = 'DigitalOcean' ];then
-        PROVIDER='do'
-    elif [ "$(dmidecode -s bios-vendor)" = 'Vultr' ];then
-        PROVIDER='vultr'
-    elif [ "$(dmidecode -s system-product-name | cut -c 1-7)" = 'Alibaba' ];then
-        PROVIDER='ali'
-    elif [ "$(dmidecode -s system-manufacturer)" = 'Microsoft Corporation' ];then
-        PROVIDER='azure'
-    else
-        PROVIDER='undefined'
     fi
 }
 
@@ -73,9 +56,11 @@ remove_aegis(){
 remove_user(){
     if [ -e /usr/bin/logname ]; then
         USER_NAME="$(logname)"
-        if [ ! -z "${USER_NAME}" ] && [ "${USER_NAME}" != 'root' ] && [ "${USER_NAME}" != 'ubuntu' ] && [ "${USER_NAME}" != 'centos' ]; then
-            echo "Cleanup user: ${USER_NAME}"
-            userdel -rf ${USER_NAME} >/dev/null 2>&1
+        if [ -n "${USER_NAME}" ] && [ "${USER_NAME}" != 'root' ] && [ "${USER_NAME}" != 'ubuntu' ] && [ "${USER_NAME}" != 'centos' ]; then
+            if [ "${PROVIDER}" = 'americancloud' ] && [ "${USER_NAME}" != 'cloud' ]; then
+                echo "Cleanup user: ${USER_NAME}"
+                userdel -rf ${USER_NAME} >/dev/null 2>&1
+            fi
         fi
     fi
 }
@@ -239,7 +224,7 @@ cleanup (){
 }
 
 main_claunch(){
-    providerck
+    check_provider
     check_os
     check_root
     remove_user
